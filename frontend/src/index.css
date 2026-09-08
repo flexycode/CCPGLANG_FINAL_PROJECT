@@ -1,0 +1,215 @@
+:root {
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --bg-main: #f3f4f6;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+.dashboard-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-content h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+
+.school-days-badge {
+  background: var(--primary);
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.school-days-badge span {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+}
+
+.school-days-badge strong {
+  display: block;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.student-profile-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.student-info h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.student-id {
+  color: var(--text-muted);
+  font-family: monospace;
+  background: var(--bg-main);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-right: 0.75rem;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.stat-box {
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.stat-box h3 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.stat-box.primary {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+.stat-box.primary .stat-value { color: var(--primary-dark); }
+
+.stat-box.warning {
+  background-color: #fffbeb;
+  border-color: #fde68a;
+}
+.stat-box.warning .stat-value { color: #b45309; }
+
+.stat-box.secondary {
+  background-color: #f3f4f6;
+}
+
+.analytics-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.breakdown-list, .details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.breakdown-item, .details-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--bg-main);
+  border-radius: 8px;
+}
+
+.breakdown-item strong, .details-list li strong {
+  font-size: 1.1rem;
+}
+
+.breakdown-item.present strong { color: var(--success); }
+.breakdown-item.absent strong { color: var(--danger); }
+.breakdown-item.late strong { color: var(--warning); }
+.breakdown-item.excused strong { color: var(--primary); }

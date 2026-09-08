@@ -1,0 +1,10 @@
+# Student Attendance Monitoring System — Python Backend Dependencies
+# No external dependencies required for the core OOP demonstration.
+# Add dependencies below as the project grows.
+
+# Testing
+# pytest>=7.0
+
+# Future: API framework (if needed)
+# fastapi>=0.100
+# uvicorn>=0.20
