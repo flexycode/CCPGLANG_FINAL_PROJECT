@@ -8,9 +8,17 @@ uvicorn[standard]>=0.30
 # Database ORM (OOP paradigm — classes map to DB tables)
 sqlalchemy>=2.0
 
+# PostgreSQL driver (for Supabase-hosted database)
+psycopg2-binary>=2.9
+
+# Environment variable management
+python-dotenv>=1.0
+
+# Async HTTP client (WorldTimeAPI real-time clock)
+httpx>=0.27
+
 # Validation & Serialization
 pydantic>=2.0
 
 # Testing
 # pytest>=7.0
-
