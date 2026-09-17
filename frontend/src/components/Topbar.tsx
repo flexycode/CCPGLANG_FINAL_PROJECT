@@ -4,20 +4,32 @@
  * PARADIGM: Functional Programming (FP)
  * 
  * Features:
- * - Real-time institutional date & active class period via useServerTime()
+ * - Real-time Philippine clock (WorldTimeAPI/Asia/Manila) with live ticking seconds
+ * - Figma-aligned search bar (pill-shaped, left-aligned)
+ * - Date + clock + active period display (right-aligned, stacked)
  * - Live notification badge and popover (Figma Layer 2)
  * - Account settings modal launcher (Figma Layer 3)
+ * 
+ * Layout (matching Figma node 2010-3598):
+ * ┌──────────────────────────────────────────────────────────────────────────┐
+ * │  🔍 Quick search a student or class   │  Thursday, September 17  🔔  ⚙️ │
+ * │  [pill-shaped search input]            │  3:45:22 PM  PHT              │
+ * │                                        │  3:00 PM - 5:00 PM            │
+ * └──────────────────────────────────────────────────────────────────────────┘
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bell, Settings, Search } from 'lucide-react';
+import { Bell, Settings, Search, Clock } from 'lucide-react';
 import { useServerTime } from '../utils/useServerTime';
 import NotificationPopover, { NotificationItem } from './NotificationPopover';
 import SettingsModal, { UserSettingsData } from './SettingsModal';
 
 const Topbar: React.FC = () => {
-  const { formattedDate, activePeriod } = useServerTime();
+  const { formattedDate, formattedTime, timezone, isLive } = useServerTime();
   
+  // Search state
+  const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false);
+
   // Notification state
   const [notifications, setNotifications] = useState<readonly NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -84,22 +96,35 @@ const Topbar: React.FC = () => {
   return (
     <>
       <header style={styles.topbar}>
-        {/* Search Bar */}
+        {/* Search Bar — Figma: pill-shaped, left-aligned, ~480px */}
         <div style={styles.searchContainer}>
           <Search size={18} style={styles.searchIcon} />
           <input 
             type="text" 
             placeholder="Quick search a student or class" 
-            style={styles.searchInput}
+            className="topbar-search-input"
+            style={{
+              ...styles.searchInput,
+              backgroundColor: isSearchFocused ? 'var(--bg-white)' : 'var(--bg-secondary)',
+              borderColor: isSearchFocused ? 'var(--brand-primary)' : 'var(--border-color)',
+              boxShadow: isSearchFocused ? '0 0 0 3px rgba(30, 30, 30, 0.08)' : 'none',
+            }}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
           />
         </div>
         
-        {/* Actions & DateTime */}
+        {/* Right Section: DateTime + Actions */}
         <div style={styles.actions}>
-          {/* Synchronized Real-Time Institutional Clock */}
+          {/* Synchronized Real-Time Philippine Clock (WorldTimeAPI) */}
           <div style={styles.datetime}>
             <span style={styles.date}>{formattedDate}</span>
-            <span style={styles.time}>{activePeriod}</span>
+            <div style={styles.clockRow}>
+              <Clock size={14} style={styles.clockIcon} />
+              <span style={styles.time}>{formattedTime}</span>
+              <span style={styles.timezoneBadge}>{timezone}</span>
+              {isLive && <span style={styles.liveDot} title="Synced with WorldTimeAPI" />}
+            </div>
           </div>
           
           {/* Notification Button & Popover */}
@@ -158,15 +183,17 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '1.5rem 2.5rem',
+    padding: '1rem 2.5rem',
     backgroundColor: 'var(--bg-primary)',
     borderBottom: '1px solid var(--border-color)',
     position: 'relative' as const,
     zIndex: 50,
+    minHeight: '72px',
   },
   searchContainer: {
     position: 'relative' as const,
-    width: '400px',
+    width: '480px',
+    maxWidth: '45%',
   },
   searchIcon: {
     position: 'absolute' as const,
@@ -174,35 +201,73 @@ const styles = {
     top: '50%',
     transform: 'translateY(-50%)',
     color: 'var(--text-muted)',
+    pointerEvents: 'none' as const,
   },
   searchInput: {
     width: '100%',
-    padding: '0.6rem 1rem 0.6rem 2.5rem',
-    borderRadius: '20px',
+    padding: '0.65rem 1rem 0.65rem 2.75rem',
+    borderRadius: '24px',
     border: '1px solid var(--border-color)',
-    backgroundColor: 'var(--bg-white)',
+    backgroundColor: 'var(--bg-secondary)',
     fontFamily: 'var(--font-body)',
+    fontSize: '0.875rem',
+    color: 'var(--text-primary)',
+    outline: 'none',
+    transition: 'all 0.25s ease',
   },
   actions: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1.5rem',
+    gap: '1.25rem',
   },
   datetime: {
     display: 'flex',
     flexDirection: 'column' as const,
     alignItems: 'flex-end',
     marginRight: '0.5rem',
+    gap: '2px',
   },
   date: {
     fontWeight: 600,
-    fontSize: '0.9rem',
+    fontSize: '0.875rem',
     color: 'var(--text-primary)',
+    lineHeight: 1.3,
+  },
+  clockRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.35rem',
+  },
+  clockIcon: {
+    color: 'var(--text-muted)',
+    opacity: 0.7,
   },
   time: {
-    fontSize: '0.8rem',
-    color: 'var(--text-muted)',
-    marginTop: '0.1rem',
+    fontSize: '0.85rem',
+    fontWeight: 500,
+    color: 'var(--text-secondary)',
+    fontFamily: "'Inter', monospace",
+    fontVariantNumeric: 'tabular-nums',
+    letterSpacing: '0.01em',
+    lineHeight: 1.3,
+  },
+  timezoneBadge: {
+    fontSize: '0.6rem',
+    fontWeight: 600,
+    color: 'var(--status-present-text)',
+    backgroundColor: 'var(--status-present-bg)',
+    padding: '1px 5px',
+    borderRadius: '4px',
+    letterSpacing: '0.03em',
+    lineHeight: 1.4,
+  },
+  liveDot: {
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    backgroundColor: 'var(--status-present-text)',
+    display: 'inline-block',
+    animation: 'pulse 2s ease-in-out infinite',
   },
   buttonWrapper: {
     position: 'relative' as const,
@@ -218,7 +283,7 @@ const styles = {
     justifyContent: 'center',
     color: 'var(--text-secondary)',
     cursor: 'pointer',
-    transition: 'background-color 0.2s',
+    transition: 'background-color 0.2s, box-shadow 0.2s',
   },
   badge: {
     position: 'absolute' as const,

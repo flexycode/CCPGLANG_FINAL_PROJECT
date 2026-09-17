@@ -1,7 +1,13 @@
 /**
- * useServerTime.ts — Real-Time Server Date & Time Hook
- * ====================================================
+ * useServerTime.ts — Real-Time Philippine Clock Hook (WorldTimeAPI + Asia/Manila)
+ * ================================================================================
  * PARADIGM: Functional Programming (FP)
+ * 
+ * Synchronizes the frontend clock with the backend's WorldTimeAPI-sourced
+ * Philippine Standard Time (PHT, UTC+8). Provides:
+ * - Live ticking clock with seconds (updates every second)
+ * - Formatted date for the topbar display
+ * - Active class period label
  * 
  * Demonstrates:
  * - Pure functions for date/time formatting
@@ -9,15 +15,21 @@
  * - Server drift offset calculation for millisecond accuracy
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export interface ServerTimeState {
   readonly formattedDate: string;
   readonly formattedTime: string;
   readonly activePeriod: string;
+  readonly timezone: string;
   readonly isLive: boolean;
 }
 
+/**
+ * Format a Date as a display-friendly date string.
+ * Uses Philippine locale conventions.
+ * e.g., "Thursday, September 17"
+ */
 const formatDisplayDate = (date: Date): string => {
   return date.toLocaleDateString('en-US', {
     weekday: 'long',
@@ -26,14 +38,23 @@ const formatDisplayDate = (date: Date): string => {
   });
 };
 
+/**
+ * Format a Date as a live clock string with seconds.
+ * e.g., "3:45:22 PM"
+ */
 const formatDisplayTime = (date: Date): string => {
   return date.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
+    second: '2-digit',
     hour12: true,
   });
 };
 
+/**
+ * Calculate the active class period based on the current hour.
+ * Matches the university scheduling blocks from the Figma design.
+ */
 const calculateActivePeriod = (date: Date): string => {
   const hour = date.getHours();
   const minute = date.getMinutes();
@@ -56,15 +77,16 @@ const calculateActivePeriod = (date: Date): string => {
 };
 
 export const useServerTime = (): ServerTimeState => {
-  const [offsetMs, setOffsetMs] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<Date>(() => new Date());
   const [activePeriod, setActivePeriod] = useState<string>('3:00 PM - 5:00 PM');
+  const [timezoneLabel, setTimezoneLabel] = useState<string>('PHT');
   const [isLive, setIsLive] = useState<boolean>(false);
+  const offsetRef = useRef<number>(0);
 
+  // Sync with backend on mount (backend fetches from WorldTimeAPI/Asia/Manila)
   useEffect(() => {
     let isMounted = true;
 
-    // Fetch initial server timestamp to calculate client-server drift offset
     const syncWithServer = async () => {
       try {
         const clientReqStart = Date.now();
@@ -77,8 +99,9 @@ export const useServerTime = (): ServerTimeState => {
           const calculatedOffset = serverTimeWithLatency - clientReqEnd;
 
           if (isMounted) {
-            setOffsetMs(calculatedOffset);
+            offsetRef.current = calculatedOffset;
             setActivePeriod(data.active_period || calculateActivePeriod(new Date(serverTimeWithLatency)));
+            setTimezoneLabel(data.timezone === 'Asia/Manila' ? 'PHT' : data.timezone);
             setIsLive(true);
           }
         }
@@ -89,21 +112,27 @@ export const useServerTime = (): ServerTimeState => {
 
     syncWithServer();
 
-    // Pure functional ticker: update clock every second
-    const intervalId = setInterval(() => {
-      setCurrentTime(() => new Date(Date.now() + offsetMs));
-    }, 1000);
-
     return () => {
       isMounted = false;
-      clearInterval(intervalId);
     };
-  }, [offsetMs]);
+  }, []);
+
+  // Tick every second using the synced offset
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const corrected = new Date(Date.now() + offsetRef.current);
+      setCurrentTime(corrected);
+      setActivePeriod(calculateActivePeriod(corrected));
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   return {
     formattedDate: formatDisplayDate(currentTime),
     formattedTime: formatDisplayTime(currentTime),
     activePeriod: activePeriod,
+    timezone: timezoneLabel,
     isLive: isLive,
   };
 };

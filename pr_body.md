@@ -1,17 +1,17 @@
 ## Overview
-This PR introduces a major architectural upgrade, migrating the frontend to TypeScript and implementing new features based on the Figma UI designs. It also finalizes the backend transition from a CLI-based OOP demo to a fully-fledged FastAPI REST API with SQLAlchemy and SQLite.
+This PR implements three major updates to the Checkmate Attendance Monitoring System based on the Figma design and infrastructure requirements.
+
+1. **Supabase PostgreSQL Migration**: Replaced the hardcoded SQLite connection with a dynamic Supabase PostgreSQL connection pool (with local SQLite fallback).
+2. **Real-Time Clock (WorldTimeAPI)**: Replaced local system time with `WorldTimeAPI` (Asia/Manila) to serve authoritative Philippine Standard Time.
+3. **Figma-Aligned Topbar UI**: Restructured the Topbar component to accurately match the Figma design (node 2010-3598).
 
 ## Key Changes
-*   **TypeScript Migration:** Ported the frontend React application from JavaScript to TypeScript for improved type safety and developer experience.
-*   **UI Modernization (Figma-Accurate):**
-    *   Implemented a dual-pane **Sign In Page** (`Login.tsx`) with backend authentication.
-    *   Added **Account Settings** (`Settings.tsx`, `SettingsModal.tsx`) with form state and persistence.
-    *   Added a **Notification System** (`NotificationPopover.tsx`) with read/unread tracking and badge updates.
-*   **Real-Time Data Integration:** Added a `/api/system/time` endpoint and a `useServerTime` React hook to synchronize the dashboard clock with the server.
-*   **Backend Cleanup:** Removed obsolete OOP models and services (`backend/models`, `backend/services`) and the `demo.js` artifacts, as the system now fully utilizes the SQLAlchemy `db_models` and Pydantic `schemas`.
-*   **Tooling Updates:** Configured Vite dev server and cleared unused entry points (`main.jsx`, `App.jsx`).
-
-## Testing
-- Verified all endpoints via Swagger UI (`/docs`).
-- Verified React frontend components load properly via `npm run dev`.
-- Authentication, Settings, and Notification flows manually tested.
+- **Backend**:
+  - `database.py`: Added Supabase connection pooling and `.env` parsing.
+  - `api/system.py`: Added `httpx` integration to fetch and cache WorldTimeAPI offset for UTC+8 time.
+  - `requirements.txt`: Added `psycopg2-binary`, `python-dotenv`, and `httpx`.
+  - Added `.env.example` template for Supabase credentials.
+- **Frontend**:
+  - `useServerTime.ts`: Updated to provide a live-ticking clock (HH:MM:SS) synchronized with the backend's WorldTimeAPI offset.
+  - `Topbar.tsx`: Updated layout to include a 480px pill-shaped search bar, right-aligned stacked datetime block (Date + Live Clock), and pulse animation for the live sync dot.
+  - `index.css`: Added focus transitions for the new search bar.
