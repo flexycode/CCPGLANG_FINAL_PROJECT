@@ -1,7 +1,7 @@
 /**
- * attendance.js — Attendance Management Utilities
+ * attendance.ts — Attendance Management Utilities
  * ================================================
- * PARADIGM: Functional Programming
+ * PARADIGM: Functional Programming (with TypeScript type safety)
  *
  * This module contains PURE FUNCTIONS for managing attendance records.
  * Every function:
@@ -10,6 +10,11 @@
  * - Produces the same output for the same input (deterministic)
  * - Has no side effects (no database calls, no console logs, no mutations)
  *
+ * TYPESCRIPT ADDITIONS:
+ * - Explicit parameter and return types enforce contracts at compile time
+ * - `Readonly<>` and `readonly` arrays prevent accidental mutation
+ * - Union types (AttendanceStatus) replace runtime validation
+ *
  * COMPARISON WITH PYTHON (OOP):
  * In the OOP approach, attendance operations are METHODS on an
  * AttendanceTracker object that maintains internal state (self.__records).
@@ -17,23 +22,10 @@
  * don't "own" any data.
  */
 
-// ─── Constants ────────────────────────────────────────────────────────
-// In functional programming, we use constants instead of Enum classes.
-// These are simple values — no class hierarchy needed.
+import type { AttendanceRecord, Student, StudentStatus, AttendanceStatus } from '../types/index.ts';
 
-export const ATTENDANCE_STATUS = Object.freeze({
-  PRESENT: "present",
-  ABSENT: "absent",
-  LATE: "late",
-  EXCUSED: "excused",
-});
-
-export const STUDENT_STATUS = Object.freeze({
-  ENROLLED: "enrolled",
-  LATE_ENROLLED: "late_enrolled",
-  DROPPED: "dropped",
-  SUSPENDED: "suspended",
-});
+// Re-export the constants from types for backwards compatibility
+export { ATTENDANCE_STATUS, STUDENT_STATUS } from '../types/index.ts';
 
 // ─── Record Creation ─────────────────────────────────────────────────
 
@@ -45,12 +37,16 @@ export const STUDENT_STATUS = Object.freeze({
  * In OOP Python, this would be: AttendanceRecord(student_id, date, status)
  * which invokes __init__ on a class. Here, we just return a plain object.
  *
- * @param {string} studentId - The student's unique identifier
- * @param {string} date - The date string (e.g., "2026-09-15")
- * @param {string} status - One of ATTENDANCE_STATUS values
- * @returns {Object} A new attendance record object
+ * TYPESCRIPT NOTE:
+ * The return type is explicitly `AttendanceRecord`, ensuring the shape
+ * matches our interface. The `AttendanceStatus` parameter type restricts
+ * inputs to valid values at compile time.
  */
-export const createAttendanceRecord = (studentId, date, status) => ({
+export const createAttendanceRecord = (
+  studentId: string,
+  date: string,
+  status: AttendanceStatus
+): AttendanceRecord => ({
   studentId,
   date,
   status,
@@ -67,18 +63,17 @@ export const createAttendanceRecord = (studentId, date, status) => ({
  * returns a plain object. The student doesn't "know" anything about
  * itself — it's just data.
  *
- * @param {string} studentId - Unique identifier
- * @param {string} firstName - Student's first name
- * @param {string} lastName - Student's last name
- * @param {string} status - One of STUDENT_STATUS values
- * @returns {Object} A new student data object
+ * TYPESCRIPT NOTE:
+ * Default parameter `status` uses the `StudentStatus` type, preventing
+ * invalid status values at compile time. In Python OOP, this validation
+ * would happen at runtime inside __init__.
  */
 export const createStudent = (
-  studentId,
-  firstName,
-  lastName,
-  status = STUDENT_STATUS.ENROLLED
-) => ({
+  studentId: string,
+  firstName: string,
+  lastName: string,
+  status: StudentStatus = "enrolled"
+): Student => ({
   studentId,
   firstName,
   lastName,
@@ -96,16 +91,19 @@ export const createStudent = (
  * array. Instead, it returns a NEW array with the record appended.
  * The spread operator (...) creates a shallow copy.
  *
+ * TYPESCRIPT NOTE:
+ * `ReadonlyArray<AttendanceRecord>` as input enforces that we cannot
+ * call .push() or .splice() on it. The return type is a new array.
+ *
  * In OOP Python: tracker.mark_attendance(student_id, date, status)
  * → mutates self.__records internally.
- *
- * @param {Array} records - Existing attendance records (NOT mutated)
- * @param {string} studentId - The student's unique identifier
- * @param {string} date - The date string
- * @param {string} status - Attendance status
- * @returns {Array} A NEW array with all previous records plus the new one
  */
-export const markAttendance = (records, studentId, date, status) => [
+export const markAttendance = (
+  records: ReadonlyArray<AttendanceRecord>,
+  studentId: string,
+  date: string,
+  status: AttendanceStatus
+): AttendanceRecord[] => [
   ...records,
   createAttendanceRecord(studentId, date, status),
 ];
@@ -120,12 +118,11 @@ export const markAttendance = (records, studentId, date, status) => [
  *
  * In OOP Python: tracker.get_records_for_student(student_id)
  * → uses list comprehension on self.__records.
- *
- * @param {Array} records - All attendance records
- * @param {string} studentId - The student to filter for
- * @returns {Array} Records belonging to the specified student
  */
-export const getRecordsForStudent = (records, studentId) =>
+export const getRecordsForStudent = (
+  records: ReadonlyArray<AttendanceRecord>,
+  studentId: string
+): AttendanceRecord[] =>
   records.filter((record) => record.studentId === studentId);
 
 /**
@@ -136,26 +133,20 @@ export const getRecordsForStudent = (records, studentId) =>
  * the spread operator creates a copy with the status overridden.
  *
  * In OOP Python: student.update_status(new_status) → mutates self.__status.
- *
- * @param {Object} student - The original student object (NOT mutated)
- * @param {string} newStatus - The new status value
- * @returns {Object} A NEW student object with the updated status
  */
-export const updateStudentStatus = (student, newStatus) => ({
+export const updateStudentStatus = (
+  student: Student,
+  newStatus: StudentStatus
+): Student => ({
   ...student,
   status: newStatus,
 });
 
 /**
  * isStudentActive — Checks if a student can attend classes.
- *
- * @param {Object} student - The student data object
- * @returns {boolean} True if enrolled or late_enrolled
  */
-export const isStudentActive = (student) =>
-  [STUDENT_STATUS.ENROLLED, STUDENT_STATUS.LATE_ENROLLED].includes(
-    student.status
-  );
+export const isStudentActive = (student: Student): boolean =>
+  (["enrolled", "late_enrolled"] as StudentStatus[]).includes(student.status);
 
 /**
  * getFullName — Derives the full name from a student object.
@@ -164,9 +155,6 @@ export const isStudentActive = (student) =>
  * In OOP Python, this would be a @property on the Student class:
  * student.full_name → computed from self.__last_name, self.__first_name.
  * Here, it's a standalone function that receives the student as data.
- *
- * @param {Object} student - The student data object
- * @returns {string} Formatted full name
  */
-export const getFullName = (student) =>
+export const getFullName = (student: Student): string =>
   `${student.lastName}, ${student.firstName}`;

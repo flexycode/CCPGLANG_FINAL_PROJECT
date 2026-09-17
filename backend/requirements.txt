@@ -1,10 +1,16 @@
 # Student Attendance Monitoring System — Python Backend Dependencies
-# No external dependencies required for the core OOP demonstration.
-# Add dependencies below as the project grows.
+# Core OOP demonstration + REST API server
+
+# API Framework
+fastapi>=0.115
+uvicorn[standard]>=0.30
+
+# Database ORM (OOP paradigm — classes map to DB tables)
+sqlalchemy>=2.0
+
+# Validation & Serialization
+pydantic>=2.0
 
 # Testing
 # pytest>=7.0
 
-# Future: API framework (if needed)
-# fastapi>=0.100
-# uvicorn>=0.20

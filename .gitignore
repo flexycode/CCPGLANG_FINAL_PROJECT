@@ -25,3 +25,6 @@ dist-ssr/
 # OS
 .DS_Store
 Thumbs.db
+
+# Database
+attendance.db
