@@ -1,7 +1,7 @@
 /**
- * time.js — Time Tracking Utilities
+ * time.ts — Time Tracking Utilities
  * ==================================
- * PARADIGM: Functional Programming
+ * PARADIGM: Functional Programming (with TypeScript type safety)
  *
  * This module contains PURE FUNCTIONS for managing time-in/time-out
  * records and determining lateness.
@@ -10,6 +10,12 @@
  * - Immutability: Time records are never mutated; new objects are returned
  * - Pure functions: Same inputs always produce the same outputs
  * - Spread operator: Creates copies of objects with modifications
+ * - Closures: createIsLateChecker captures configuration in a closure
+ *
+ * TYPESCRIPT ADDITIONS:
+ * - TimeRecord type enforces the shape of time entries
+ * - Return types make function contracts explicit
+ * - Overloads could be used for different parameter combinations
  *
  * COMPARISON WITH PYTHON (OOP):
  * In Python, TimeEntry is a CLASS with mutable state:
@@ -20,6 +26,8 @@
  *   const entry = recordTimeIn("STU-001");
  *   const completed = recordTimeOut(entry);  ← returns new object
  */
+
+import type { TimeRecord } from '../types/index.ts';
 
 // ─── Time Record Operations ─────────────────────────────────────────
 
@@ -32,12 +40,11 @@
  *
  * In OOP Python: entry = TimeEntry(student_id) → creates an object
  * with self.time_in set in __init__.
- *
- * @param {string} studentId - The student's unique identifier
- * @param {number} [timestamp=Date.now()] - The arrival timestamp
- * @returns {Object} A new time record with timeIn set
  */
-export const recordTimeIn = (studentId, timestamp = Date.now()) => ({
+export const recordTimeIn = (
+  studentId: string,
+  timestamp: number = Date.now()
+): TimeRecord => ({
   studentId,
   timeIn: timestamp,
   timeOut: null,
@@ -52,12 +59,11 @@ export const recordTimeIn = (studentId, timestamp = Date.now()) => ({
  *
  * In OOP Python: entry.record_time_out() → mutates self.time_out directly.
  * The original object IS the modified object.
- *
- * @param {Object} timeRecord - The original time record (NOT mutated)
- * @param {number} [timestamp=Date.now()] - The departure timestamp
- * @returns {Object} A NEW time record with timeOut set
  */
-export const recordTimeOut = (timeRecord, timestamp = Date.now()) => ({
+export const recordTimeOut = (
+  timeRecord: TimeRecord,
+  timestamp: number = Date.now()
+): TimeRecord => ({
   ...timeRecord,
   timeOut: timestamp,
 });
@@ -73,11 +79,8 @@ export const recordTimeOut = (timeRecord, timestamp = Date.now()) => ({
  *
  * In OOP Python, this is a @property on TimeEntry:
  *   entry.duration → computed from self.time_in and self.time_out
- *
- * @param {Object} timeRecord - A time record with timeIn and timeOut
- * @returns {number|null} Duration in hours (2 decimal places), or null if incomplete
  */
-export const calculateDuration = (timeRecord) => {
+export const calculateDuration = (timeRecord: TimeRecord): number | null => {
   if (timeRecord.timeIn == null || timeRecord.timeOut == null) {
     return null;
   }
@@ -97,19 +100,13 @@ export const calculateDuration = (timeRecord) => {
  *
  * Here, the configuration is passed as parameters — the function
  * has no hidden state or configuration. Everything is explicit.
- *
- * @param {number} arrivalTimestamp - When the student arrived (ms since epoch)
- * @param {number} classStartHour - Class start hour (0-23)
- * @param {number} classStartMinute - Class start minute (0-59)
- * @param {number} [thresholdMinutes=15] - Grace period in minutes
- * @returns {boolean} True if the student arrived after the cutoff
  */
 export const isLate = (
-  arrivalTimestamp,
-  classStartHour,
-  classStartMinute,
-  thresholdMinutes = 15
-) => {
+  arrivalTimestamp: number,
+  classStartHour: number,
+  classStartMinute: number,
+  thresholdMinutes: number = 15
+): boolean => {
   const arrival = new Date(arrivalTimestamp);
   const arrivalMinutes = arrival.getHours() * 60 + arrival.getMinutes();
   const cutoffMinutes = classStartHour * 60 + classStartMinute + thresholdMinutes;
@@ -126,24 +123,23 @@ export const isLate = (
  * function has already returned.
  *
  * In OOP Python, this "remembering" is done via self attributes.
- * In functional JS, closures serve the same purpose without classes.
+ * In functional TS, closures serve the same purpose without classes.
  *
- * @param {number} classStartHour - Class start hour (0-23)
- * @param {number} classStartMinute - Class start minute (0-59)
- * @param {number} [thresholdMinutes=15] - Grace period in minutes
- * @returns {Function} A function that takes an arrival timestamp and returns boolean
+ * TYPESCRIPT NOTE:
+ * The return type `(arrivalTimestamp: number) => boolean` explicitly
+ * documents that the returned function is a predicate.
  *
  * @example
  * const checkLate = createIsLateChecker(8, 0, 15);
  * checkLate(someTimestamp); // → true or false
  */
 export const createIsLateChecker = (
-  classStartHour,
-  classStartMinute,
-  thresholdMinutes = 15
-) => {
+  classStartHour: number,
+  classStartMinute: number,
+  thresholdMinutes: number = 15
+): ((arrivalTimestamp: number) => boolean) => {
   // The returned function CLOSES OVER these variables (closure)
-  return (arrivalTimestamp) =>
+  return (arrivalTimestamp: number): boolean =>
     isLate(arrivalTimestamp, classStartHour, classStartMinute, thresholdMinutes);
 };
 
@@ -151,12 +147,11 @@ export const createIsLateChecker = (
 
 /**
  * formatTimestamp — Formats a timestamp into a human-readable string.
- *
- * @param {number} timestamp - Milliseconds since epoch
- * @param {string} [locale="en-PH"] - Locale for formatting
- * @returns {string} Formatted date-time string
  */
-export const formatTimestamp = (timestamp, locale = "en-PH") =>
+export const formatTimestamp = (
+  timestamp: number,
+  locale: string = "en-PH"
+): string =>
   new Date(timestamp).toLocaleString(locale, {
     year: "numeric",
     month: "short",
@@ -167,11 +162,8 @@ export const formatTimestamp = (timestamp, locale = "en-PH") =>
 
 /**
  * formatDuration — Converts hours to a human-readable duration string.
- *
- * @param {number} hours - Duration in hours
- * @returns {string} Formatted string (e.g., "2h 30m")
  */
-export const formatDuration = (hours) => {
+export const formatDuration = (hours: number | null): string => {
   if (hours == null) return "N/A";
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);

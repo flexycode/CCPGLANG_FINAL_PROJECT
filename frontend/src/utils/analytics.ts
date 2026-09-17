@@ -1,7 +1,7 @@
 /**
- * analytics.js — Attendance Analytics Utilities
+ * analytics.ts — Attendance Analytics Utilities
  * ==============================================
- * PARADIGM: Functional Programming
+ * PARADIGM: Functional Programming (with TypeScript type safety)
  *
  * This module contains PURE FUNCTIONS for calculating attendance
  * analytics and metrics. Every function receives data as parameters
@@ -13,6 +13,11 @@
  * - Pure functions (no side effects, deterministic)
  * - Closures (functions that capture variables from outer scope)
  *
+ * TYPESCRIPT ADDITIONS:
+ * - Generic types ensure type-safe accumulator in reduce()
+ * - Return types document the contract of each function
+ * - ReadonlyArray prevents accidental mutation of input data
+ *
  * COMPARISON WITH PYTHON (OOP):
  * In the OOP approach, these calculations are METHODS on the
  * AttendanceTracker class (e.g., tracker.attendance_percentage("STU-001")).
@@ -20,7 +25,13 @@
  * Here, the data is always passed in as a parameter.
  */
 
-import { ATTENDANCE_STATUS } from "./attendance.js";
+import type {
+  AttendanceRecord,
+  AttendanceStatus,
+  AttendanceSummary,
+  StreakAccumulator,
+} from '../types/index.ts';
+import { ATTENDANCE_STATUS } from '../types/index.ts';
 
 // ─── Counting Functions ──────────────────────────────────────────────
 
@@ -35,12 +46,11 @@ import { ATTENDANCE_STATUS } from "./attendance.js";
  *
  * In OOP Python: tracker.count_by_status(student_id, status)
  * → uses sum() with a generator expression on self.__records.
- *
- * @param {Array} records - Attendance records to count
- * @param {string} status - The status to match
- * @returns {number} Count of matching records
  */
-export const countByStatus = (records, status) =>
+export const countByStatus = (
+  records: ReadonlyArray<AttendanceRecord>,
+  status: AttendanceStatus
+): number =>
   records.filter((r) => r.status === status).length;
 
 /**
@@ -50,35 +60,34 @@ export const countByStatus = (records, status) =>
  * This is FUNCTION COMPOSITION — it delegates to countByStatus,
  * partially applying the status parameter. This is equivalent to
  * creating a specialized function from a general one.
- *
- * @param {Array} records - Attendance records
- * @returns {number} Total present count
  */
-export const totalPresent = (records) =>
+export const totalPresent = (
+  records: ReadonlyArray<AttendanceRecord>
+): number =>
   countByStatus(records, ATTENDANCE_STATUS.PRESENT);
 
 /**
  * totalAbsent — Counts ABSENT records.
- * @param {Array} records - Attendance records
- * @returns {number} Total absent count
  */
-export const totalAbsent = (records) =>
+export const totalAbsent = (
+  records: ReadonlyArray<AttendanceRecord>
+): number =>
   countByStatus(records, ATTENDANCE_STATUS.ABSENT);
 
 /**
  * totalLate — Counts LATE records.
- * @param {Array} records - Attendance records
- * @returns {number} Total late count
  */
-export const totalLate = (records) =>
+export const totalLate = (
+  records: ReadonlyArray<AttendanceRecord>
+): number =>
   countByStatus(records, ATTENDANCE_STATUS.LATE);
 
 /**
  * totalExcused — Counts EXCUSED records.
- * @param {Array} records - Attendance records
- * @returns {number} Total excused count
  */
-export const totalExcused = (records) =>
+export const totalExcused = (
+  records: ReadonlyArray<AttendanceRecord>
+): number =>
   countByStatus(records, ATTENDANCE_STATUS.EXCUSED);
 
 /**
@@ -89,11 +98,10 @@ export const totalExcused = (records) =>
  * physically present in both cases.
  *
  * Formula: totalPresent + totalLate
- *
- * @param {Array} records - Attendance records
- * @returns {number} Total days attended (present + late)
  */
-export const totalDaysAttended = (records) =>
+export const totalDaysAttended = (
+  records: ReadonlyArray<AttendanceRecord>
+): number =>
   totalPresent(records) + totalLate(records);
 
 // ─── Percentage Calculations ─────────────────────────────────────────
@@ -106,12 +114,8 @@ export const totalDaysAttended = (records) =>
  * about attendance. It's a reusable building block that other
  * functions compose with. This is the essence of functional
  * programming: build small, generic functions and compose them.
- *
- * @param {number} part - The numerator
- * @param {number} total - The denominator
- * @returns {number} Percentage rounded to 2 decimal places, or 0 if total is 0
  */
-export const calculatePercentage = (part, total) =>
+export const calculatePercentage = (part: number, total: number): number =>
   total === 0 ? 0 : Math.round((part / total) * 10000) / 100;
 
 /**
@@ -126,36 +130,33 @@ export const calculatePercentage = (part, total) =>
  * → calls self.total_days_attended() / self.__total_school_days
  *
  * Formula: (totalDaysAttended / totalSchoolDays) × 100
- *
- * @param {Array} records - Attendance records for one student
- * @param {number} totalSchoolDays - Total scheduled class days
- * @returns {number} Attendance percentage (0-100)
  */
-export const attendancePercentage = (records, totalSchoolDays) =>
+export const attendancePercentage = (
+  records: ReadonlyArray<AttendanceRecord>,
+  totalSchoolDays: number
+): number =>
   calculatePercentage(totalDaysAttended(records), totalSchoolDays);
 
 /**
  * absencePercentage — Calculates overall absence rate.
  *
  * Formula: (totalAbsent / totalSchoolDays) × 100
- *
- * @param {Array} records - Attendance records for one student
- * @param {number} totalSchoolDays - Total scheduled class days
- * @returns {number} Absence percentage (0-100)
  */
-export const absencePercentage = (records, totalSchoolDays) =>
+export const absencePercentage = (
+  records: ReadonlyArray<AttendanceRecord>,
+  totalSchoolDays: number
+): number =>
   calculatePercentage(totalAbsent(records), totalSchoolDays);
 
 /**
  * latePercentage — Calculates overall late rate.
  *
  * Formula: (totalLate / totalSchoolDays) × 100
- *
- * @param {Array} records - Attendance records for one student
- * @param {number} totalSchoolDays - Total scheduled class days
- * @returns {number} Late percentage (0-100)
  */
-export const latePercentage = (records, totalSchoolDays) =>
+export const latePercentage = (
+  records: ReadonlyArray<AttendanceRecord>,
+  totalSchoolDays: number
+): number =>
   calculatePercentage(totalLate(records), totalSchoolDays);
 
 // ─── Streak Calculations ─────────────────────────────────────────────
@@ -171,15 +172,19 @@ export const latePercentage = (records, totalSchoolDays) =>
  * The accumulator { max, current } tracks the streak state WITHOUT
  * mutable variables — each iteration returns a NEW accumulator object.
  *
+ * TYPESCRIPT NOTE:
+ * The `StreakAccumulator` type ensures the accumulator shape is
+ * consistent across all iterations. TypeScript catches errors if
+ * we forget to return `max` or `current`.
+ *
  * In OOP Python: tracker.consecutive_absences(student_id)
  * → uses a for loop with mutable max_streak and current_streak variables.
- *
- * @param {Array} records - Attendance records SORTED BY DATE
- * @param {string} status - The status to find streaks for
- * @returns {number} Length of the longest consecutive streak
  */
-export const calculateConsecutiveStreak = (records, status) =>
-  records.reduce(
+export const calculateConsecutiveStreak = (
+  records: ReadonlyArray<AttendanceRecord>,
+  status: AttendanceStatus
+): number =>
+  records.reduce<StreakAccumulator>(
     (acc, record) => {
       const current = record.status === status ? acc.current + 1 : 0;
       return { max: Math.max(acc.max, current), current };
@@ -193,11 +198,10 @@ export const calculateConsecutiveStreak = (records, status) =>
  * PURPOSE:
  * Identifies students who may be at risk due to extended absences.
  * A high consecutive absence count may trigger academic intervention.
- *
- * @param {Array} records - Attendance records sorted by date
- * @returns {number} Longest consecutive absence streak
  */
-export const consecutiveAbsences = (records) =>
+export const consecutiveAbsences = (
+  records: ReadonlyArray<AttendanceRecord>
+): number =>
   calculateConsecutiveStreak(records, ATTENDANCE_STATUS.ABSENT);
 
 /**
@@ -205,11 +209,10 @@ export const consecutiveAbsences = (records) =>
  *
  * PURPOSE:
  * Identifies patterns of chronic tardiness.
- *
- * @param {Array} records - Attendance records sorted by date
- * @returns {number} Longest consecutive late streak
  */
-export const consecutiveLates = (records) =>
+export const consecutiveLates = (
+  records: ReadonlyArray<AttendanceRecord>
+): number =>
   calculateConsecutiveStreak(records, ATTENDANCE_STATUS.LATE);
 
 // ─── Summary Report ──────────────────────────────────────────────────
@@ -222,14 +225,18 @@ export const consecutiveLates = (records) =>
  * a single, comprehensive output. It demonstrates how functional
  * programming builds complex behavior from simple, reusable parts.
  *
+ * TYPESCRIPT NOTE:
+ * The return type `AttendanceSummary` guarantees that every field
+ * is present and correctly typed. If we add a new metric to the
+ * interface, TypeScript will flag this function as incomplete.
+ *
  * In OOP Python: analytics_service.student_summary(student_id)
  * → calls multiple methods on the tracker object.
- *
- * @param {Array} records - All attendance records for one student
- * @param {number} totalSchoolDays - Total scheduled class days
- * @returns {Object} Complete attendance summary
  */
-export const generateStudentSummary = (records, totalSchoolDays) => ({
+export const generateStudentSummary = (
+  records: ReadonlyArray<AttendanceRecord>,
+  totalSchoolDays: number
+): AttendanceSummary => ({
   totalPresent: totalPresent(records),
   totalAbsent: totalAbsent(records),
   totalLate: totalLate(records),
