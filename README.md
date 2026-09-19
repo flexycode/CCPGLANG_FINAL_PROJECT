@@ -27,7 +27,7 @@ The **Student Attendance Monitoring System** is designed to track and manage stu
 
 ### Objective
 
-- Demonstrate how **JavaScript + React** solves attendance tracking using **Functional Programming** (pure functions, immutability, composition)
+- Demonstrate how **TypeScript + React** solves attendance tracking using **Functional Programming** (pure functions, immutability, composition)
 - Demonstrate how **Python** solves the same problem using **Object-Oriented Programming** (classes, encapsulation, methods)
 - Document and explain every function/method with detailed purpose and paradigm-specific rationale
 
@@ -53,7 +53,7 @@ The **Student Attendance Monitoring System** is designed to track and manage stu
 
 | Component | Technology | Paradigm | Purpose |
 |-----------|------------|----------|---------|
-| **Frontend** | JavaScript + React | Functional Programming | UI rendering, state management via pure functions, attendance calculations using `map`, `filter`, `reduce` |
+| **Frontend** | TypeScript + React | Functional Programming | UI rendering, state management via pure functions, attendance calculations using `map`, `filter`, `reduce` |
 | **Backend** | Python | Object-Oriented Programming | Data modeling via classes, encapsulated business logic, method-based analytics |
 | **Design** | Figma | — | UI/UX wireframes and prototyping |
 
@@ -64,7 +64,7 @@ The **Student Attendance Monitoring System** is designed to track and manage stu
 │                     SAME PROBLEM DOMAIN                            │
 │              Student Attendance Monitoring System                   │
 ├──────────────────────────────┬──────────────────────────────────────┤
-│    JavaScript + React        │          Python                     │
+│    TypeScript + React        │          Python                     │
 │    (Functional Paradigm)     │     (OOP Paradigm)                  │
 ├──────────────────────────────┼──────────────────────────────────────┤
 │  Pure functions              │  Classes & Objects                  │
@@ -118,46 +118,59 @@ The **Student Attendance Monitoring System** is designed to track and manage stu
 | **Consecutive Absences** | Longest absence streak | Max sequential absent days |
 | **Consecutive Lates** | Longest late streak | Max sequential late days |
 
-> 📝 Each metric above is implemented in **both JS (functional)** and **Python (OOP)** with detailed inline documentation explaining the paradigm-specific approach.
+> 📝 Each metric above is implemented in **both TS (functional)** and **Python (OOP)** with detailed inline documentation explaining the paradigm-specific approach.
 
 ---
 
 ## 📁 Project Structure
 
-```
+```text
 CCPGLANG_FINAL_PROJECT/
 ├── 📄 README.md
 ├── 📄 LICENSE
+├── 📄 attendance.db                  # SQLite database
 │
 ├── 📂 docs/                          # Manuscript & documentation
 │   ├── manuscript.md                 # Full written manuscript
 │   ├── paradigm-comparison.md        # Side-by-side code comparisons
-│   └── figures/                      # Diagrams, Figma exports
+│   ├── 📂 agentic-tasks/             # Agentic tasks and walkthroughs
+│   └── 📂 figures/                   # Diagrams, Figma exports
 │
-├── 📂 frontend/                      # JS + React (Functional Paradigm)
-│   ├── src/
-│   │   ├── components/               # React functional components
-│   │   ├── hooks/                    # Custom hooks
-│   │   ├── utils/                    # Pure utility functions
-│   │   │   ├── attendance.js         # Attendance marking functions
-│   │   │   ├── analytics.js          # Metrics & calculations
-│   │   │   └── time.js               # Time tracking utilities
-│   │   └── App.jsx
-│   └── package.json
+├── 📂 frontend/                      # TypeScript + React (Functional Paradigm)
+│   ├── 📂 src/
+│   │   ├── 📂 assets/                # Images and icons
+│   │   ├── 📂 components/            # React UI components (Layout, Sidebar, Topbar, etc.)
+│   │   ├── 📂 pages/                 # Page components (Dashboard, Login, AttendancePoint, etc.)
+│   │   ├── 📂 types/                 # TypeScript interfaces and types
+│   │   ├── 📂 utils/                 # Pure utility functions and hooks
+│   │   │   ├── analytics.ts          # Metrics & calculations
+│   │   │   ├── attendance.ts         # Attendance logic
+│   │   │   ├── auth.ts               # Authentication logic
+│   │   │   ├── time.ts               # Time tracking utilities
+│   │   │   └── useServerTime.ts      # Custom hook for server time synchronization
+│   │   ├── App.tsx                   # Main React application component
+│   │   └── main.tsx                  # React entry point
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── vite.config.ts
 │
-├── 📂 backend/                       # Python (OOP Paradigm)
-│   ├── models/
-│   │   ├── student.py                # Student class
-│   │   ├── attendance_record.py      # AttendanceRecord class
-│   │   └── attendance_tracker.py     # AttendanceTracker manager
-│   ├── services/
-│   │   ├── analytics_service.py      # Analytics calculations
-│   │   └── time_service.py           # Time tracking logic
-│   ├── main.py
-│   └── requirements.txt
+├── 📂 backend/                       # Python FastAPI (OOP Paradigm)
+│   ├── 📂 api/                       # API endpoints (Routers)
+│   │   ├── analytics.py              # Analytics and metrics endpoints
+│   │   ├── attendance.py             # Attendance marking endpoints
+│   │   ├── auth.py                   # Authentication endpoints
+│   │   ├── notifications.py          # Notifications endpoints
+│   │   ├── settings.py               # System settings endpoints
+│   │   ├── students.py               # Student management endpoints
+│   │   └── system.py                 # System-level endpoints
+│   ├── database.py                   # SQLAlchemy engine and session setup
+│   ├── db_models.py                  # SQLAlchemy ORM models (Student, Attendance, etc.)
+│   ├── main.py                       # FastAPI application entry point
+│   ├── requirements.txt              # Python dependencies
+│   └── schemas.py                    # Pydantic models for data validation
 │
 └── 📂 figma/                         # Figma design assets & exports
-    └── exports/
+    └── 📂 exports/
 ```
 
 ---
@@ -167,8 +180,8 @@ CCPGLANG_FINAL_PROJECT/
 | Week | Focus | Key Deliverables |
 |------|-------|-----------------|
 | **Week 1** (Sep 8–14) | Research, Design & Docs Foundation | Figma wireframes, manuscript outline, feature docs |
-| **Week 2** (Sep 15–21) | Python OOP Backend | Working backend, unit tests, OOP manuscript section |
-| **Week 3** (Sep 22–28) | JS + React Frontend | Working frontend, Figma-to-code, Functional manuscript section |
+| **Week 2** (Sep 15–21) | Python OOP Backend | Working backend, FastAPI routes, OOP manuscript section |
+| **Week 3** (Sep 22–28) | TS + React Frontend | Working frontend, Figma-to-code, Functional manuscript section |
 | **Week 4** (Sep 29–Oct 6) | Integration, Polish & Submission | Complete system, final manuscript, demo, GitHub release |
 
 ---
@@ -183,7 +196,7 @@ CCPGLANG_FINAL_PROJECT/
 - Python (v3.10+)
 - npm or yarn
 
-### Frontend (JavaScript + React)
+### Frontend (TypeScript + React)
 
 ```bash
 cd frontend
@@ -191,12 +204,18 @@ npm install
 npm run dev
 ```
 
-### Backend (Python)
+### Backend (Python FastAPI)
 
 ```bash
-cd backend
-pip install -r requirements.txt
-python main.py
+# Create and activate virtual environment (Windows)
+python -m venv venv
+.\venv\Scripts\activate
+
+# Install dependencies
+pip install -r backend\requirements.txt
+
+# Run the API server
+uvicorn backend.main:app --reload
 ```
 
 ---
