@@ -1,0 +1,39 @@
+# ─── Render Blueprint (Infrastructure-as-Code) ──────────────────────
+# This file lets Render auto-detect your service configuration.
+#
+# Deploy via:  https://render.com/deploy  → connect this repo
+# Or push to your connected branch and Render will pick it up.
+# ─────────────────────────────────────────────────────────────────────
+
+services:
+  # ── Python FastAPI Backend ──────────────────────────────────────
+  - type: web
+    name: ccpglang-attendance-api
+    runtime: python
+    region: singapore          # closest to PH — change if needed
+
+    # Build phase — install Python dependencies from the backend/ subdirectory
+    buildCommand: pip install -r backend/requirements.txt
+
+    # Start phase — launch the FastAPI server
+    # Runs from the repo root so `from backend.xxx` imports resolve correctly
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+
+    # Render injects the PORT env var automatically
+    envVars:
+      # Supabase PostgreSQL connection string
+      # ⚠️  Set this value manually in the Render Dashboard
+      #     (Settings → Environment → Add Environment Variable)
+      #     Never commit real credentials to source control.
+      - key: SUPABASE_DB_URL
+        sync: false            # must be set manually in dashboard
+
+      # Python won't buffer stdout — logs appear in real-time
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+    # Free instance spins down after 15 min of inactivity
+    plan: free
+
+    # Health check — Render pings this to verify the service is alive
+    healthCheckPath: /
