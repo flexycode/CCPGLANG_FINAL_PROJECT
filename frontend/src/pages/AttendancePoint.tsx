@@ -4,7 +4,7 @@ import StatusBadge from '../components/StatusBadge';
 const AttendancePoint: React.FC = () => {
   // Generate dummy weeks W1-W12
   const weeks = Array.from({ length: 12 }, (_, i) => `W${i + 1}`);
-  
+
   const generateRandomStatus = () => {
     const statuses = ['present', 'present', 'present', 'late', 'absent'];
     return statuses[Math.floor(Math.random() * statuses.length)] as any;
@@ -50,12 +50,12 @@ const AttendancePoint: React.FC = () => {
                   </td>
                   {student.history.map((status, i) => (
                     <td key={i} style={styles.tdCenter}>
-                      <div 
+                      <div
                         style={{
                           ...styles.dot,
-                          backgroundColor: status === 'present' ? 'var(--status-present-text)' 
-                                         : status === 'late' ? 'var(--status-late-text)'
-                                         : 'var(--status-absent-text)'
+                          backgroundColor: status === 'present' ? 'var(--status-present-text)'
+                            : status === 'late' ? 'var(--status-late-text)'
+                              : 'var(--status-absent-text)'
                         }}
                         title={status}
                       />
@@ -68,8 +68,8 @@ const AttendancePoint: React.FC = () => {
                     <span style={styles.countText}>{student.absences}</span>
                   </td>
                   <td style={styles.td}>
-                    <StatusBadge 
-                      status={student.status === 'pass' ? 'pass' : 'absent'} 
+                    <StatusBadge
+                      status={student.status === 'pass' ? 'pass' : 'absent'}
                       label={student.status === 'pass' ? 'Pass' : 'Failed'}
                     />
                   </td>

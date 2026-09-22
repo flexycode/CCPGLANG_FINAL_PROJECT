@@ -143,3 +143,258 @@ button {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
+
+/* ─── Landing Page Animations ─────────────────────────────────── */
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes subtleGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15),
+                0 0 60px rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.25),
+                0 0 80px rgba(255, 255, 255, 0.1);
+  }
+}
+
+@keyframes floatContour {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50%      { transform: scale(1.03) rotate(1deg); }
+}
+
+/* ─── Landing Page Styles ─────────────────────────────────────── */
+.landing-page {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1814;
+}
+
+.landing-video-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.landing-gradient-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    #1a1814 0%,
+    #2c2620 20%,
+    #3d3428 40%,
+    #2a2318 60%,
+    #1a1814 80%,
+    #2c2620 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 12s ease infinite;
+  z-index: 0;
+}
+
+.landing-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
+}
+
+.landing-contour-art {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  animation: floatContour 8s ease-in-out infinite;
+}
+
+.landing-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2rem;
+  animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.landing-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+.landing-logo-square {
+  width: 56px;
+  height: 56px;
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.landing-logo-inner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 4px;
+}
+
+.landing-brand-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.landing-brand-title {
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.landing-brand-subtitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 0.3rem;
+}
+
+.landing-tagline {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 420px;
+  line-height: 1.6;
+  animation: fadeInUp 1s ease-out 0.6s both;
+}
+
+.landing-cta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  animation: fadeInUp 1s ease-out 0.8s both;
+}
+
+.landing-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1rem 3rem;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: subtleGlow 3s ease-in-out infinite;
+  text-decoration: none;
+}
+
+.landing-cta-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.landing-signin-link {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.landing-signin-link:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.landing-footer {
+  position: absolute;
+  bottom: 2rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 3;
+  animation: fadeIn 1s ease-out 1.2s both;
+}
+
+.landing-footer-text {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Login Page Fade-in ──────────────────────────────────────── */
+.login-page-enter {
+  animation: fadeIn 0.5s ease-out both;
+}
+
+@media (max-width: 768px) {
+  .landing-brand-title {
+    font-size: 2.2rem;
+  }
+  .landing-tagline {
+    font-size: 0.95rem;
+    max-width: 320px;
+  }
+  .landing-cta-btn {
+    padding: 0.85rem 2.2rem;
+    font-size: 0.95rem;
+  }
+}
+
