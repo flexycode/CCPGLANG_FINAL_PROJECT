@@ -17,8 +17,9 @@
   --status-absent-text: #FF5252;
   --status-absent-bg: #FFEBEE;
   
-  --status-late-text: #FFA726;
-  --status-late-bg: #FFF3E0;
+  --status-late-text: #854D0E;
+  --status-late-bg: #FEF9C3;
+  --status-late-border: #FACC15;
   
   /* Brand/Action Colors */
   --brand-primary: #1E1E1E; /* Black primary action button */

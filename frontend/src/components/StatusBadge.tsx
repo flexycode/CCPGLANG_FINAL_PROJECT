@@ -17,25 +17,32 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label }) => {
       case 'absent':
         return { bg: 'var(--status-absent-bg)', text: 'var(--status-absent-text)' };
       case 'late':
-        return { bg: 'var(--status-late-bg)', text: 'var(--status-late-text)' };
+        return { 
+          bg: 'var(--status-late-bg)', 
+          text: 'var(--status-late-text)',
+          border: '1px solid var(--status-late-border)' 
+        };
       case 'excused':
       case 'select':
       default:
-        return { bg: 'var(--bg-secondary)', text: 'var(--text-muted)' };
+        return { bg: 'var(--bg-secondary)', text: 'var(--text-muted)', border: '1px solid transparent' };
     }
   };
 
   const currentStyles = getStyles();
 
-  const badgeStyle = {
+  const badgeStyle: React.CSSProperties = {
     backgroundColor: currentStyles.bg,
     color: currentStyles.text,
+    border: currentStyles.border || '1px solid transparent',
     padding: '0.25rem 0.75rem',
     borderRadius: '12px',
     fontSize: '0.8rem',
     fontWeight: 600,
-    display: 'inline-block',
-    textTransform: 'capitalize' as const,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textTransform: 'capitalize',
   };
 
   return (
