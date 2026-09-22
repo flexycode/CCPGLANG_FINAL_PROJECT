@@ -21,8 +21,8 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
 
   // Functional state hooks
-  const [username, setUsername] = useState<string>('Scaluya7');
-  const [password, setPassword] = useState<string>('password123');
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -59,7 +59,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div style={styles.pageContainer}>
+    <div style={styles.pageContainer} className="login-page-enter">
       {/* ─── Left Brand Column (Figma Sand / Beige Banner) ─────────── */}
       <div style={styles.leftColumn}>
         {/* Geometric Contour Line Art (Figma aesthetic) */}
@@ -70,10 +70,10 @@ const Login: React.FC = () => {
             xmlns="http://www.w3.org/2000/svg"
             style={styles.contourSvg}
           >
-            <circle cx="250" cy="350" r="160" stroke="#D3C9BC" strokeWidth="1.2" opacity="0.65" />
-            <circle cx="250" cy="350" r="230" stroke="#D3C9BC" strokeWidth="1" opacity="0.45" />
-            <circle cx="250" cy="350" r="300" stroke="#D3C9BC" strokeWidth="0.8" opacity="0.35" />
-            <circle cx="250" cy="350" r="380" stroke="#D3C9BC" strokeWidth="0.6" opacity="0.25" />
+            <circle cx="250" cy="350" r="140" stroke="#D3C9BC" strokeWidth="1" opacity="0.55" />
+            <circle cx="250" cy="350" r="220" stroke="#D3C9BC" strokeWidth="0.9" opacity="0.40" />
+            <circle cx="250" cy="350" r="310" stroke="#D3C9BC" strokeWidth="0.7" opacity="0.30" />
+            <circle cx="250" cy="350" r="400" stroke="#D3C9BC" strokeWidth="0.5" opacity="0.20" />
           </svg>
         </div>
 

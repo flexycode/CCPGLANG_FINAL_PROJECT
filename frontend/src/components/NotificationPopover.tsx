@@ -25,6 +25,7 @@ interface NotificationPopoverProps {
   readonly onClose: () => void;
   readonly onMarkAllAsRead: () => void;
   readonly onMarkAsRead: (id: number) => void;
+  readonly onSyncAction?: () => void;
 }
 
 export const NotificationPopover: React.FC<NotificationPopoverProps> = ({
@@ -32,6 +33,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({
   onClose,
   onMarkAllAsRead,
   onMarkAsRead,
+  onSyncAction,
 }) => {
   const popoverRef = useRef<HTMLDivElement>(null);
 
@@ -70,13 +72,17 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({
               key={item.id} 
               style={{
                 ...styles.item,
-                backgroundColor: item.is_read ? 'transparent' : 'rgba(0, 0, 0, 0.02)',
+                backgroundColor: item.is_read ? 'transparent' : 'rgba(0, 0, 0, 0.015)',
               }}
-              onClick={() => onMarkAsRead(item.id)}
+              onClick={() => {
+                onMarkAsRead(item.id);
+                if (item.category === 'system' && onSyncAction) {
+                  onSyncAction();
+                }
+              }}
             >
               <div style={styles.itemHeader}>
                 <div style={styles.titleContainer}>
-                  {!item.is_read && <span style={styles.unreadDot} />}
                   <span style={styles.itemTitle}>{item.title}</span>
                 </div>
                 <span style={styles.itemTime}>{item.relative_time}</span>
@@ -95,10 +101,10 @@ const styles = {
     position: 'absolute' as const,
     top: 'calc(100% + 12px)',
     right: '0',
-    width: '380px',
+    width: '320px',
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)',
+    borderRadius: '8px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
     border: '1px solid var(--border-color)',
     zIndex: 1000,
     overflow: 'hidden',
@@ -108,20 +114,20 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '1.25rem 1.5rem',
-    borderBottom: '1px solid #F0ECE4',
+    padding: '1.2rem 1.25rem',
+    borderBottom: '1px solid #EBE8E0',
   },
   title: {
-    fontSize: '1.1rem',
+    fontSize: '1.25rem',
     fontWeight: 700,
     margin: 0,
     fontFamily: 'var(--font-body)',
-    color: '#1E1E1E',
+    color: '#1A1A1A',
   },
   markAllReadBtn: {
-    fontSize: '0.82rem',
+    fontSize: '0.9rem',
     fontWeight: 500,
-    color: '#3B82F6',
+    color: '#2563EB',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
@@ -130,12 +136,12 @@ const styles = {
     transition: 'opacity 0.2s',
   },
   list: {
-    maxHeight: '400px',
+    maxHeight: '357px',
     overflowY: 'auto' as const,
   },
   item: {
-    padding: '1.1rem 1.5rem',
-    borderBottom: '1px solid #F4F1EA',
+    padding: '1.2rem 1.25rem',
+    borderBottom: '1px solid #F0ECE4',
     cursor: 'pointer',
     transition: 'background-color 0.15s',
   },
@@ -143,34 +149,27 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: '0.35rem',
+    marginBottom: '0.4rem',
   },
   titleContainer: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
   },
-  unreadDot: {
-    width: '7px',
-    height: '7px',
-    borderRadius: '50%',
-    backgroundColor: '#3B82F6',
-    display: 'inline-block',
-  },
   itemTitle: {
-    fontSize: '0.92rem',
+    fontSize: '1rem',
     fontWeight: 700,
     color: '#1A1A1A',
   },
   itemTime: {
-    fontSize: '0.78rem',
+    fontSize: '0.85rem',
     color: '#8A8A8A',
     whiteSpace: 'nowrap' as const,
   },
   itemMessage: {
-    fontSize: '0.84rem',
-    color: '#4B4B4B',
-    lineHeight: 1.45,
+    fontSize: '0.95rem',
+    color: '#666666',
+    lineHeight: 1.5,
     margin: 0,
   },
   emptyState: {

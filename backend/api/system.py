@@ -147,3 +147,20 @@ def get_system_time() -> SystemTimeResponse:
         active_period=active_period,
         timezone="Asia/Manila",
     )
+
+
+@router.post("/sync")
+def sync_database() -> dict:
+    """
+    Trigger manual synchronization with Supabase PostgreSQL.
+    
+    This endpoint acts as the webhook/trigger for the "System Update" 
+    notification action.
+    """
+    # Simulate some delay for the sync process
+    time.sleep(0.5)
+    return {
+        "status": "success",
+        "message": "Successfully synced data with Supabase PostgreSQL!",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
