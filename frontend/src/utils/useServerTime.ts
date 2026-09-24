@@ -90,7 +90,7 @@ export const useServerTime = (): ServerTimeState => {
     const syncWithServer = async () => {
       try {
         const clientReqStart = Date.now();
-        const response = await fetch('http://localhost:8000/api/system/time');
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/system/time`);
         if (response.ok) {
           const data = await response.json();
           const clientReqEnd = Date.now();
