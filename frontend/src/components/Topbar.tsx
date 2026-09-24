@@ -41,7 +41,7 @@ const Topbar: React.FC = () => {
   // Fetch notifications from backend
   const fetchNotifications = useCallback(async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/notifications');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/notifications`);
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications || []);
@@ -62,7 +62,7 @@ const Topbar: React.FC = () => {
   // Mark all notifications as read
   const handleMarkAllAsRead = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/notifications/mark-all-read', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/notifications/mark-all-read`, {
         method: 'POST',
       });
       if (res.ok) {
@@ -79,7 +79,7 @@ const Topbar: React.FC = () => {
   // Mark single notification as read
   const handleMarkAsRead = async (id: number) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/notifications/${id}/read`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/notifications/${id}/read`, {
         method: 'PATCH',
       });
       if (res.ok) {
