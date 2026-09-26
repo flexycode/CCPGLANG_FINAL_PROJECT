@@ -1,11 +1,13 @@
+import logo from '../assets/checkmate_logo.jpg';
+
 export default function SidePanel() {
   return (
     <div className="w-full md:w-1/3 lg:w-1/4 bg-[linear-gradient(180deg,#E6D0C1_0%,#FFFAF6_34.13%,#EEE9E4_100%)] relative flex flex-col justify-center p-10 overflow-hidden max-md:px-6 max-md:py-[60px] max-md:items-center min-h-[250px]">
       <div className="flex items-center gap-4 z-10">
 
         {/* replace add logo here */}
-        <div className="w-[50px] h-[50px] bg-[#A39E93] rounded-xl shrink-0 flex items-center justify-center text-white font-bold font-serif text-2xl shadow-sm">
-          C
+        <div className="w-[50px] h-[50px] shrink-0 flex items-center justify-center rounded-xl shadow-sm overflow-hidden">
+          <img src={logo} alt="Checkmate Logo" className="w-full h-full object-cover" />
         </div>
         <div className="flex flex-col">
           <h2 className="text-[28px] font-bold font-serif m-0 text-[#1F2328] leading-[1.1]">Checkmate</h2>
