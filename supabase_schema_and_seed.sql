@@ -127,7 +127,14 @@ INSERT INTO students (id, first_name, last_name, status) VALUES
 ('2023-047', 'Thomas', 'Robinson', 'enrolled'),
 ('2023-048', 'Brian', 'King', 'enrolled'),
 ('2023-049', 'Dorothy', 'Carter', 'enrolled'),
-('2023-050', 'Sharon', 'Collins', 'enrolled');
+('2023-050', 'Sharon', 'Collins', 'enrolled'),
+('2022-348291-01', 'James Adrian', 'Castro', 'enrolled'),
+('2022-348291-02', 'Marco Polo', 'Cunanan', 'enrolled'),
+('2022-348291-03', 'Rinoah Venedict', 'Dela Rama', 'enrolled'),
+('2022-348291-04', 'Jannah Cleine', 'Glodo', 'enrolled'),
+('2022-348291-05', 'Jersey Mae', 'Marisga', 'enrolled'),
+('2022-348291-06', 'Jed Nathan', 'Poserio', 'enrolled'),
+('2022-348291-07', 'Jay Arre', 'Talosig', 'enrolled');
 
 -- -----------------------------------------------------------------------------
 -- 4. Seed Attendance Records for Today & Recent Sessions
