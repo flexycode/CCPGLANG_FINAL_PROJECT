@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LayoutGrid, FileText, BookOpen, Plus, LogOut, ChevronLeft, Trash2 } from 'lucide-react';
 import { showToast } from './ui/toast';
+import logo from '../assets/checkmate_logo.jpg';
 
 interface SidebarProps {
     onSignOut?: () => void;
@@ -91,10 +92,10 @@ export default function Sidebar({ onSignOut, activePage = 'Overview', onPageChan
                 <div className="flex items-center justify-between gap-1 relative z-10 min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
                         <div
-                            className={`bg-[#A39E93] rounded-xl shrink-0 flex items-center justify-center text-white font-bold font-serif shadow-sm transition-all ${isCollapsed ? 'w-8 h-8 text-sm' : 'w-9 h-9 text-base'
+                            className={`shrink-0 flex items-center justify-center rounded-xl shadow-sm overflow-hidden transition-all ${isCollapsed ? 'w-8 h-8 text-sm' : 'w-9 h-9 text-base'
                                 }`}
                         >
-                            C
+                            <img src={logo} alt="Checkmate Logo" className="w-full h-full object-cover" />
                         </div>
                         {!isCollapsed && (
                             <div className="overflow-hidden whitespace-nowrap min-w-0">
