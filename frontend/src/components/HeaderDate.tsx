@@ -72,9 +72,9 @@ export default function HeaderDate() {
                         role="button"
                         tabIndex={0}
                         title="Click to open date picker"
-                        className="flex items-center gap-2 text-xs font-semibold text-gray-500 cursor-pointer hover:text-gray-900 transition-colors select-none group"
+                        className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-gray-100 transition-colors select-none group"
                     >
-                        <div className="p-1 text-gray-400 group-hover:text-gray-700 hover:bg-black/5 rounded-md transition-colors flex items-center justify-center">
+                        <div className="p-1 text-gray-400 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors flex items-center justify-center">
                             <CalendarIcon size={16} />
                         </div>
                         <span>{formatDate(currentDate)}</span>
@@ -82,7 +82,7 @@ export default function HeaderDate() {
                         <span>{formatTime(currentDate)}</span>
                     </div>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-3 bg-white border border-gray-200/80 shadow-xl rounded-2xl z-50" align="start">
+                <PopoverContent className="w-auto p-3 bg-white dark:bg-[#16213e] border border-gray-200/80 dark:border-white/10 shadow-2xl rounded-2xl z-50 text-gray-900 dark:text-gray-100" align="start">
                     <Calendar
                         mode="single"
                         selected={selectedDate}
@@ -101,7 +101,7 @@ export default function HeaderDate() {
                 <button
                     onClick={() => setIsNotificationsOpen(true)}
                     aria-label="Notifications"
-                    className="p-2.5 text-gray-600 hover:bg-gray-100/80 rounded-full transition-all relative cursor-pointer"
+                    className="p-2.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-white/10 rounded-full transition-all relative cursor-pointer"
                 >
                     <Bell size={18} />
                     {hasUnread && (
@@ -111,7 +111,7 @@ export default function HeaderDate() {
                 <button
                     onClick={() => setIsSettingsOpen(true)}
                     aria-label="Settings"
-                    className="p-2.5 text-gray-600 hover:bg-gray-100/80 rounded-full transition-all cursor-pointer"
+                    className="p-2.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-white/10 rounded-full transition-all cursor-pointer"
                 >
                     <Settings size={18} />
                 </button>

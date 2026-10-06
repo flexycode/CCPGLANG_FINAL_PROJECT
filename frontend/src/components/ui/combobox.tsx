@@ -40,17 +40,17 @@ export function Combobox({
                     role="button"
                     tabIndex={0}
                     className={cn(
-                        'w-full bg-[#F5F2EC] px-3.5 py-1.5 rounded-xl flex items-center justify-between text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all select-none',
+                        'w-full bg-[#F5F2EC] dark:bg-[#1E293B] px-3.5 py-1.5 rounded-xl flex items-center justify-between text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600 transition-all select-none',
                         className
                     )}
                 >
-                    <span className={selectedOption && selectedOption.value !== 'Select Here' ? 'text-[#1F2328] font-semibold' : 'text-gray-500'}>
+                    <span className={selectedOption && selectedOption.value !== 'Select Here' ? 'text-[#1F2328] dark:text-white font-semibold' : 'text-gray-500 dark:text-gray-400'}>
                         {selectedOption ? selectedOption.label : placeholder}
                     </span>
-                    <ChevronDown size={iconSize} className="text-gray-500 shrink-0 ml-2" />
+                    <ChevronDown size={iconSize} className="text-gray-500 dark:text-gray-400 shrink-0 ml-2" />
                 </div>
             </PopoverTrigger>
-            <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[200px] p-1.5 bg-white border border-gray-200/80 shadow-xl rounded-2xl z-50 animate-in fade-in zoom-in-95 duration-150" align="start">
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[200px] p-1.5 bg-white dark:bg-[#16213e] border border-gray-200/80 dark:border-white/10 shadow-xl rounded-2xl z-50 animate-in fade-in zoom-in-95 duration-150" align="start">
                 <div className="max-h-56 overflow-y-auto flex flex-col gap-0.5">
                     {options.map((option) => {
                         const isSelected = option.value === value;
@@ -65,12 +65,12 @@ export function Combobox({
                                 className={cn(
                                     'flex items-center justify-between px-3 py-2 text-xs font-medium rounded-xl transition-all text-left w-full cursor-pointer',
                                     isSelected
-                                        ? 'bg-gray-100 text-[#1F2328] font-bold'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-gray-100 dark:bg-white/10 text-[#1F2328] dark:text-white font-bold'
+                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                                 )}
                             >
                                 <span>{option.label}</span>
-                                {isSelected && <Check size={14} className="text-gray-800 shrink-0 ml-2" />}
+                                {isSelected && <Check size={14} className="text-gray-800 dark:text-white shrink-0 ml-2" />}
                             </button>
                         );
                     })}
