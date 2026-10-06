@@ -27,13 +27,13 @@ export default function NotificationsModal({
             <div className="fixed inset-0" onClick={onClose}></div>
 
             {/* Notifications Popover Card */}
-            <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden z-10 animate-in zoom-in-95 duration-150">
+            <div className="relative w-full max-w-sm bg-white dark:bg-[#151D2A] rounded-3xl shadow-2xl border border-gray-100 dark:border-white/10 overflow-hidden z-10 animate-in zoom-in-95 duration-150">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-                    <h2 className="text-lg font-bold text-[#1F2328]">Notifications</h2>
+                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-white/10">
+                    <h2 className="text-lg font-bold text-[#1F2328] dark:text-white">Notifications</h2>
                     <button
                         onClick={onMarkAllRead}
-                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+                        className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer"
                     >
                         Mark all as read
                     </button>
@@ -42,17 +42,17 @@ export default function NotificationsModal({
                 {/* Notifications List */}
                 <div className="p-6 flex flex-col gap-5 max-h-[420px] overflow-y-auto">
                     {notifications.map((item) => (
-                        <div key={item.id} className="flex flex-col gap-1 pb-4 border-b border-gray-100 last:border-b-0 last:pb-0">
+                        <div key={item.id} className="flex flex-col gap-1 pb-4 border-b border-gray-100 dark:border-white/10 last:border-b-0 last:pb-0">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     {!item.read && (
                                         <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" title="Unread"></span>
                                     )}
-                                    <span className="text-sm font-bold text-[#1F2328]">{item.title}</span>
+                                    <span className="text-sm font-bold text-[#1F2328] dark:text-white">{item.title}</span>
                                 </div>
                                 <span className="text-xs text-gray-400 font-normal">{item.time}</span>
                             </div>
-                            <p className="text-xs text-gray-500 leading-relaxed mt-0.5">{item.content}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mt-0.5">{item.content}</p>
                         </div>
                     ))}
                 </div>

@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { ThemeProvider } from './utils/theme';
 import SidePanel from './components/SidePanel';
 import LoginForm from './components/LoginForm';
 import Overview from './overview';
 import Reports from './reports';
 import ClassDetails from './classDetails';
+import LandingPage from './pages/LandingPage';
 import ToastContainer from './components/ui/toast';
 
 const classTitleMap: Record<string, { title: string; code: string; fullCode: string }> = {
@@ -14,24 +16,43 @@ const classTitleMap: Record<string, { title: string; code: string; fullCode: str
   CCDATRCL: { title: 'Data Structure', code: 'CCDATRCL', fullCode: 'CCDATRCL - COM242' },
 };
 
+type AppPage = 'Landing' | 'Login' | 'Dashboard';
+
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentPage, setCurrentPage] = useState<AppPage>('Landing');
   const [activePage, setActivePage] = useState('Overview');
 
+  const handleSignIn = () => {
+    setCurrentPage('Dashboard');
+    setActivePage('Overview');
+  };
+
+  const handleSignOut = () => {
+    setCurrentPage('Landing');
+    setActivePage('Overview');
+  };
+
   const renderContent = () => {
-    if (!isLoggedIn) {
+    // Landing page — first screen
+    if (currentPage === 'Landing') {
+      return <LandingPage onGetStarted={() => setCurrentPage('Login')} />;
+    }
+
+    // Login page
+    if (currentPage === 'Login') {
       return (
         <div className="flex min-h-screen w-screen flex-col md:flex-row">
-          <SidePanel />
-          <LoginForm onSignIn={() => setIsLoggedIn(true)} />
+          <SidePanel onBackToLanding={() => setCurrentPage('Landing')} />
+          <LoginForm onSignIn={handleSignIn} />
         </div>
       );
     }
 
+    // Dashboard pages
     if (activePage === 'Reports') {
       return (
         <Reports
-          onSignOut={() => setIsLoggedIn(false)}
+          onSignOut={handleSignOut}
           onPageChange={(page) => setActivePage(page)}
         />
       );
@@ -45,7 +66,7 @@ function App() {
       };
       return (
         <ClassDetails
-          onSignOut={() => setIsLoggedIn(false)}
+          onSignOut={handleSignOut}
           onPageChange={(page) => setActivePage(page)}
           classCode={currentClass.code}
           classNameTitle={currentClass.title}
@@ -56,17 +77,17 @@ function App() {
 
     return (
       <Overview
-        onSignOut={() => setIsLoggedIn(false)}
+        onSignOut={handleSignOut}
         onPageChange={(page) => setActivePage(page)}
       />
     );
   };
 
   return (
-    <>
+    <ThemeProvider>
       {renderContent()}
       <ToastContainer />
-    </>
+    </ThemeProvider>
   );
 }
 

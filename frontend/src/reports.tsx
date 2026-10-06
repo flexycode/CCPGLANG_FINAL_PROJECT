@@ -3,6 +3,7 @@ import { AlertCircle, User, Download, ChevronLeft, ChevronRight } from 'lucide-r
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import Sidebar from './components/Sidebar';
 import HeaderDate from './components/HeaderDate';
+import { useTheme } from './utils/theme';
 import { Combobox } from '@/components/ui/combobox';
 import {
     ChartContainer,
@@ -78,6 +79,7 @@ const actionStudents = [
 ];
 
 export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
+    const { isDark } = useTheme();
     const [reportType, setReportType] = useState('Select Here');
     const [dateRange, setDateRange] = useState('Select Here');
     const [chartClassFilter, setChartClassFilter] = useState('All Classes');
@@ -178,7 +180,7 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
     };
 
     return (
-        <div className="flex h-screen w-full bg-[#FFFBF4] text-[#1F2328] font-sans overflow-hidden">
+        <div className="flex h-screen w-full bg-[#FFFBF4] dark:bg-[#0B132B] text-[#1F2328] dark:text-slate-100 font-sans overflow-hidden transition-colors duration-200">
             <Sidebar onSignOut={onSignOut} activePage="Reports" onPageChange={onPageChange} />
 
             {/* Main Content Area */}
@@ -193,15 +195,15 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                     {/* Page Title & Action Button */}
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-4xl font-serif font-bold text-[#1F2328] tracking-tight">
+                            <h1 className="text-4xl font-serif font-bold text-[#1F2328] dark:text-white tracking-tight">
                                 Reports & Analytics
                             </h1>
-                            <p className="text-sm text-gray-500 mt-1 font-medium">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
                                 View and export detailed class attendance summary.
                             </p>
                         </div>
 
-                        <button className="flex items-center gap-2 px-5 py-2.5 bg-[#1F2328] text-white text-sm font-medium rounded-2xl shadow-sm hover:bg-black transition-all cursor-pointer">
+                        <button className="flex items-center gap-2 px-5 py-2.5 bg-[#1F2328] dark:bg-blue-600 text-white text-sm font-medium rounded-2xl shadow-sm hover:bg-black dark:hover:bg-blue-700 transition-all cursor-pointer">
                             <Download size={16} />
                             <span>Export Report</span>
                         </button>
@@ -211,28 +213,28 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                 {/* Section 1: Summary Metric Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Stat Card 1 */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between gap-3">
-                        <span className="text-xs font-bold text-gray-500">Semester Average</span>
-                        <div className="text-4xl font-bold text-[#1F2328]">93.2%</div>
-                        <div className="text-xs font-medium text-gray-400">
-                            <span className="text-emerald-600 font-bold">+1.2%</span> vs last week
+                    <div className="bg-white dark:bg-[#151D2A] p-6 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col justify-between gap-3 transition-colors">
+                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Semester Average</span>
+                        <div className="text-4xl font-bold text-[#1F2328] dark:text-white">93.2%</div>
+                        <div className="text-xs font-medium text-gray-400 dark:text-gray-400">
+                            <span className="text-emerald-600 dark:text-emerald-400 font-bold">+1.2%</span> vs last week
                         </div>
                     </div>
 
                     {/* Stat Card 2 */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between gap-3">
-                        <span className="text-xs font-bold text-gray-500">Total Absences</span>
-                        <div className="text-4xl font-bold text-[#1F2328]">24</div>
-                        <div className="text-xs font-medium text-gray-400">
-                            <span className="text-rose-500 font-bold">-12</span> vs last week
+                    <div className="bg-white dark:bg-[#151D2A] p-6 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col justify-between gap-3 transition-colors">
+                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Total Absences</span>
+                        <div className="text-4xl font-bold text-[#1F2328] dark:text-white">24</div>
+                        <div className="text-xs font-medium text-gray-400 dark:text-gray-400">
+                            <span className="text-rose-500 dark:text-rose-400 font-bold">-12</span> vs last week
                         </div>
                     </div>
 
                     {/* Stat Card 3 */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between gap-3">
-                        <span className="text-xs font-bold text-gray-500">Lowest Performing Class</span>
-                        <div className="text-2xl md:text-3xl font-bold text-[#1F2328] tracking-tight">CCPGLANG - COM232</div>
-                        <div className="text-xs font-medium text-gray-400">88% average</div>
+                    <div className="bg-white dark:bg-[#151D2A] p-6 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col justify-between gap-3 transition-colors">
+                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Lowest Performing Class</span>
+                        <div className="text-2xl md:text-3xl font-bold text-[#1F2328] dark:text-white tracking-tight">CCPGLANG - COM232</div>
+                        <div className="text-xs font-medium text-gray-400 dark:text-gray-400">88% average</div>
                     </div>
                 </div>
 
@@ -240,7 +242,7 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 max-w-xl">
                     {/* Report Type */}
                     <div className="flex-1 flex flex-col gap-1">
-                        <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Report Type</label>
+                        <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Report Type</label>
                         <Combobox
                             options={reportTypeOptions}
                             value={reportType}
@@ -251,7 +253,7 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
 
                     {/* Date Range */}
                     <div className="flex-1 flex flex-col gap-1">
-                        <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Date Range</label>
+                        <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Range</label>
                         <Combobox
                             options={dateRangeOptions}
                             value={dateRange}
@@ -262,11 +264,11 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                 </div>
 
                 {/* Section 3: Attendance Trend Chart Card */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-5">
+                <div className="bg-white dark:bg-[#151D2A] p-6 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col gap-5 transition-colors">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-xl font-serif font-bold text-[#1F2328]">Attendance Trend</h2>
-                            <p className="text-[11px] text-gray-400 mt-0.5 font-medium">
+                            <h2 className="text-xl font-serif font-bold text-[#1F2328] dark:text-white">Attendance Trend</h2>
+                            <p className="text-[11px] text-gray-400 dark:text-gray-400 mt-0.5 font-medium">
                                 Across all sections over the 12-week semester
                             </p>
                         </div>
@@ -275,7 +277,7 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                             value={chartClassFilter}
                             onChange={setChartClassFilter}
                             placeholder="All Classes"
-                            className="bg-gray-100/80 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 w-auto min-w-[140px]"
+                            className="bg-gray-100/80 dark:bg-white/10 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 w-auto min-w-[140px]"
                             iconSize={13}
                         />
                     </div>
@@ -297,7 +299,7 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                                     data={trendData.slice(0, 6)}
                                     margin={{ left: 0, right: 20, top: 10, bottom: 0 }}
                                 >
-                                    <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
+                                    <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={isDark ? 0.15 : 0.3} stroke={isDark ? "#475569" : "#E5E7EB"} />
                                     <XAxis
                                         dataKey="week"
                                         tickLine={false}
@@ -305,20 +307,20 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                                         tickMargin={10}
                                         interval={0}
                                         padding={{ left: 15, right: 25 }}
-                                        tick={{ fontSize: 12, fill: '#6B7280' }}
+                                        tick={{ fontSize: 12, fill: isDark ? '#9CA3AF' : '#6B7280' }}
                                     />
                                     <YAxis
                                         domain={[87, 98]}
                                         ticks={[87, 90, 93, 96, 98]}
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                                        tick={{ fontSize: 11, fill: isDark ? '#64748B' : '#9CA3AF' }}
                                     />
                                     <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                                     <defs>
                                         <linearGradient id="fillTrend1" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#1F2937" stopOpacity={0.4} />
-                                            <stop offset="95%" stopColor="#1F2937" stopOpacity={0.0} />
+                                            <stop offset="5%" stopColor={isDark ? "#3B82F6" : "#1F2937"} stopOpacity={0.4} />
+                                            <stop offset="95%" stopColor={isDark ? "#3B82F6" : "#1F2937"} stopOpacity={0.0} />
                                         </linearGradient>
                                     </defs>
                                     <Area
@@ -326,10 +328,10 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                                         type="natural"
                                         fill="url(#fillTrend1)"
                                         fillOpacity={0.3}
-                                        stroke="#1F2937"
+                                        stroke={isDark ? "#60A5FA" : "#1F2937"}
                                         strokeWidth={2.5}
                                         dot={false}
-                                        activeDot={{ r: 5, fill: "#1F2937" }}
+                                        activeDot={{ r: 5, fill: isDark ? "#60A5FA" : "#1F2937" }}
                                     />
                                 </AreaChart>
                             </ChartContainer>
@@ -343,7 +345,7 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                                     data={trendData.slice(6, 12)}
                                     margin={{ left: 0, right: 20, top: 10, bottom: 0 }}
                                 >
-                                    <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
+                                    <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={isDark ? 0.15 : 0.3} stroke={isDark ? "#475569" : "#E5E7EB"} />
                                     <XAxis
                                         dataKey="week"
                                         tickLine={false}
@@ -351,20 +353,20 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                                         tickMargin={10}
                                         interval={0}
                                         padding={{ left: 15, right: 25 }}
-                                        tick={{ fontSize: 12, fill: '#6B7280' }}
+                                        tick={{ fontSize: 12, fill: isDark ? '#9CA3AF' : '#6B7280' }}
                                     />
                                     <YAxis
                                         domain={[87, 98]}
                                         ticks={[87, 90, 93, 96, 98]}
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                                        tick={{ fontSize: 11, fill: isDark ? '#64748B' : '#9CA3AF' }}
                                     />
                                     <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                                     <defs>
                                         <linearGradient id="fillTrend2" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#1F2937" stopOpacity={0.4} />
-                                            <stop offset="95%" stopColor="#1F2937" stopOpacity={0.0} />
+                                            <stop offset="5%" stopColor={isDark ? "#3B82F6" : "#1F2937"} stopOpacity={0.4} />
+                                            <stop offset="95%" stopColor={isDark ? "#3B82F6" : "#1F2937"} stopOpacity={0.0} />
                                         </linearGradient>
                                     </defs>
                                     <Area
@@ -372,10 +374,10 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                                         type="natural"
                                         fill="url(#fillTrend2)"
                                         fillOpacity={0.3}
-                                        stroke="#1F2937"
+                                        stroke={isDark ? "#60A5FA" : "#1F2937"}
                                         strokeWidth={2.5}
                                         dot={false}
-                                        activeDot={{ r: 5, fill: "#1F2937" }}
+                                        activeDot={{ r: 5, fill: isDark ? "#60A5FA" : "#1F2937" }}
                                     />
                                 </AreaChart>
                             </ChartContainer>
@@ -383,11 +385,11 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                     </div>
 
                     {/* Custom Horizontal Scrollbar Control with Left & Right Arrows */}
-                    <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                    <div className="flex items-center gap-2 pt-2 border-t border-gray-100 dark:border-white/10">
                         <button
                             onClick={() => scrollToPage(0)}
                             disabled={chartPage === 0}
-                            className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-30 rounded-md transition-all cursor-pointer shrink-0"
+                            className="p-1 text-gray-400 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 disabled:opacity-30 rounded-md transition-all cursor-pointer shrink-0"
                             title="Weeks 1-6"
                             aria-label="Weeks 1-6"
                         >
@@ -400,10 +402,10 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                             onPointerMove={handlePointerMove}
                             onPointerUp={handlePointerUp}
                             onPointerCancel={handlePointerUp}
-                            className="flex-1 h-2.5 bg-gray-100 hover:bg-gray-200/70 rounded-full relative cursor-grab active:cursor-grabbing select-none py-0.5 transition-colors touch-none"
+                            className="flex-1 h-2.5 bg-gray-100 dark:bg-white/10 hover:bg-gray-200/70 dark:hover:bg-white/15 rounded-full relative cursor-grab active:cursor-grabbing select-none py-0.5 transition-colors touch-none"
                         >
                             <div
-                                className="h-full bg-gray-300 hover:bg-gray-400 active:bg-gray-500 rounded-full transition-transform duration-75 ease-out shadow-sm"
+                                className="h-full bg-gray-300 dark:bg-white/30 hover:bg-gray-400 dark:hover:bg-white/50 active:bg-gray-500 rounded-full transition-transform duration-75 ease-out shadow-sm"
                                 style={{
                                     width: '50%',
                                     transform: `translateX(${scrollProgress * 100}%)`,
@@ -414,7 +416,7 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                         <button
                             onClick={() => scrollToPage(1)}
                             disabled={chartPage === 1}
-                            className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-30 rounded-md transition-all cursor-pointer shrink-0"
+                            className="p-1 text-gray-400 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 disabled:opacity-30 rounded-md transition-all cursor-pointer shrink-0"
                             title="Weeks 7-12"
                             aria-label="Weeks 7-12"
                         >
@@ -424,13 +426,13 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                 </div>
 
                 {/* Section 4: Action Required Section */}
-                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col gap-4">
+                <div className="bg-white dark:bg-[#151D2A] p-6 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col gap-4 transition-colors">
                     <div>
                         <div className="flex items-center gap-2">
                             <AlertCircle className="text-red-500 stroke-[2]" size={18} />
-                            <h2 className="text-xl font-serif font-bold text-[#1F2328]">Action Required</h2>
+                            <h2 className="text-xl font-serif font-bold text-[#1F2328] dark:text-white">Action Required</h2>
                         </div>
-                        <p className="text-[11px] text-gray-400 mt-0.5 font-medium">
+                        <p className="text-[11px] text-gray-400 dark:text-gray-400 mt-0.5 font-medium">
                             Students whose absence rate exceeds 20% across their enrolled sections.
                         </p>
                     </div>
@@ -439,29 +441,29 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                         {actionStudents.map((student) => (
                             <div
                                 key={student.id}
-                                className="bg-[#F9F8F4] p-2.5 px-3.5 rounded-xl flex items-center justify-between hover:bg-[#F5F2EC] transition-all"
+                                className="bg-[#F9F8F4] dark:bg-white/5 p-2.5 px-3.5 rounded-xl flex items-center justify-between hover:bg-[#F5F2EC] dark:hover:bg-white/10 transition-all"
                             >
                                 <div className="flex items-center gap-2.5">
-                                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-400 dark:text-gray-300 shrink-0">
                                         <User size={16} />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-xs font-bold text-[#1F2328]">{student.name}</span>
-                                        <span className="text-[11px] text-gray-400 font-mono mt-0.5">
+                                        <span className="text-xs font-bold text-[#1F2328] dark:text-white">{student.name}</span>
+                                        <span className="text-[11px] text-gray-400 dark:text-gray-400 font-mono mt-0.5">
                                             {student.studentId} • {student.subject}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div className="flex flex-col items-end">
-                                    <span className="text-xs font-bold text-red-500">{student.absenceRate}</span>
-                                    <span className="text-[11px] text-gray-400 font-normal">{student.missedCount}</span>
+                                    <span className="text-xs font-bold text-red-500 dark:text-red-400">{student.absenceRate}</span>
+                                    <span className="text-[11px] text-gray-400 dark:text-gray-400 font-normal">{student.missedCount}</span>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <button className="px-5 py-2 bg-[#F5F2EC] hover:bg-gray-200/80 text-[#1F2328] text-[11px] font-bold rounded-full transition-all text-center mx-auto block cursor-pointer">
+                    <button className="px-5 py-2 bg-[#F5F2EC] dark:bg-white/10 hover:bg-gray-200/80 dark:hover:bg-white/15 text-[#1F2328] dark:text-white text-[11px] font-bold rounded-full transition-all text-center mx-auto block cursor-pointer">
                         View All Required Actions (5)
                     </button>
                 </div>

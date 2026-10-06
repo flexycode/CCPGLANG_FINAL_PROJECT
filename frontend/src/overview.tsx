@@ -8,6 +8,7 @@ import {
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 import Sidebar from './components/Sidebar';
 import HeaderDate from './components/HeaderDate';
+import { useTheme } from './utils/theme';
 import {
     ChartContainer,
     ChartTooltip,
@@ -72,7 +73,7 @@ const renderCustomAxisTick = ({ x, y, payload }: any) => {
                 y={0}
                 dy={12}
                 textAnchor="middle"
-                className="text-[12px] fill-gray-500 font-medium"
+                className="text-[12px] fill-gray-500 dark:fill-gray-400 font-medium"
             >
                 {payload.value}
             </text>
@@ -81,6 +82,7 @@ const renderCustomAxisTick = ({ x, y, payload }: any) => {
 };
 
 export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
+    const { isDark } = useTheme();
     const [attendanceWeekPage, setAttendanceWeekPage] = useState<number>(0);
     const [attentionWeekPage, setAttentionWeekPage] = useState<number>(0);
 
@@ -128,7 +130,7 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
     ];
 
     return (
-        <div className="flex h-screen w-full bg-[#FFFBF4] text-[#1F2328] font-sans overflow-hidden">
+        <div className="flex h-screen w-full bg-[#FFFBF4] dark:bg-[#0B132B] text-[#1F2328] dark:text-slate-100 font-sans overflow-hidden transition-colors duration-200">
             <Sidebar onSignOut={onSignOut} activePage="Overview" onPageChange={onPageChange} />
 
             {/* Main Content Area */}
@@ -142,10 +144,10 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
 
                     {/* Greeting Section */}
                     <div>
-                        <h1 className="text-4xl font-serif font-bold text-[#1F2328] tracking-tight">
+                        <h1 className="text-4xl font-serif font-bold text-[#1F2328] dark:text-white tracking-tight">
                             Good morning, Prof. Caluya
                         </h1>
-                        <p className="text-sm text-gray-500 mt-1 font-medium">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
                             You have 3 classes scheduled today.
                         </p>
                     </div>
@@ -153,38 +155,38 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
 
                 {/* Search Bar */}
                 <div className="relative max-w-xl">
-                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                     <input
                         type="text"
                         placeholder="Quick search a student or class"
-                        className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200/80 rounded-full text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 shadow-sm transition-all"
+                        className="w-full pl-11 pr-4 py-3 bg-white dark:bg-[#151D2A] border border-gray-200/80 dark:border-white/10 rounded-full text-sm text-[#1F2328] dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-blue-500 shadow-sm transition-all"
                     />
                 </div>
 
                 {/* Charts Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Chart 1: Overall Attendance */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col gap-4">
+                    <div className="bg-white dark:bg-[#151D2A] p-6 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col gap-4 transition-colors">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-bold text-[#1F2328]">Overall Attendance</h3>
+                            <h3 className="text-sm font-bold text-[#1F2328] dark:text-white">Overall Attendance</h3>
                             <div className="flex items-center gap-3">
                                 {/* Week Page Navigation Arrows */}
-                                <div className="flex items-center gap-1 bg-gray-50 border border-gray-200/80 p-1 rounded-xl">
+                                <div className="flex items-center gap-1 bg-gray-50 dark:bg-white/5 border border-gray-200/80 dark:border-white/10 p-1 rounded-xl">
                                     <button
                                         onClick={() => setAttendanceWeekPage(0)}
                                         disabled={attendanceWeekPage === 0}
-                                        className="p-1 rounded-lg text-gray-600 hover:bg-gray-200/60 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                                        className="p-1 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
                                         title="Weeks 1-6"
                                     >
                                         <ChevronLeft size={14} />
                                     </button>
-                                    <span className="text-[11px] font-bold text-gray-600 px-1 min-w-[50px] text-center">
+                                    <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300 px-1 min-w-[50px] text-center">
                                         {attendanceWeekPage === 0 ? "W1–W6" : "W7–W12"}
                                     </span>
                                     <button
                                         onClick={() => setAttendanceWeekPage(1)}
                                         disabled={attendanceWeekPage === 1}
-                                        className="p-1 rounded-lg text-gray-600 hover:bg-gray-200/60 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                                        className="p-1 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
                                         title="Weeks 7-12"
                                     >
                                         <ChevronRight size={14} />
@@ -199,7 +201,7 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                                 data={visibleAttendanceData}
                                 margin={{ left: 0, right: 0, top: 10, bottom: 0 }}
                             >
-                                <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
+                                <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={isDark ? 0.15 : 0.3} stroke={isDark ? "#475569" : "#E5E7EB"} />
                                 <XAxis
                                     dataKey="week"
                                     tickLine={false}
@@ -222,7 +224,7 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                                     fillOpacity={0.4}
                                     stroke="#3B82F6"
                                     strokeWidth={3}
-                                    dot={{ r: 4, fill: "#FFFFFF", stroke: "#3B82F6", strokeWidth: 2.5 }}
+                                    dot={{ r: 4, fill: isDark ? "#151D2A" : "#FFFFFF", stroke: "#3B82F6", strokeWidth: 2.5 }}
                                     activeDot={{ r: 6, fill: "#3B82F6" }}
                                 />
                             </AreaChart>
@@ -230,27 +232,27 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                     </div>
 
                     {/* Chart 2: Requires Attention */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col gap-4">
+                    <div className="bg-white dark:bg-[#151D2A] p-6 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col gap-4 transition-colors">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-bold text-[#1F2328]">Requires Attention</h3>
+                            <h3 className="text-sm font-bold text-[#1F2328] dark:text-white">Requires Attention</h3>
                             <div className="flex items-center gap-3">
                                 {/* Week Page Navigation Arrows */}
-                                <div className="flex items-center gap-1 bg-gray-50 border border-gray-200/80 p-1 rounded-xl">
+                                <div className="flex items-center gap-1 bg-gray-50 dark:bg-white/5 border border-gray-200/80 dark:border-white/10 p-1 rounded-xl">
                                     <button
                                         onClick={() => setAttentionWeekPage(0)}
                                         disabled={attentionWeekPage === 0}
-                                        className="p-1 rounded-lg text-gray-600 hover:bg-gray-200/60 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                                        className="p-1 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
                                         title="Weeks 1-6"
                                     >
                                         <ChevronLeft size={14} />
                                     </button>
-                                    <span className="text-[11px] font-bold text-gray-600 px-1 min-w-[50px] text-center">
+                                    <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300 px-1 min-w-[50px] text-center">
                                         {attentionWeekPage === 0 ? "W1–W6" : "W7–W12"}
                                     </span>
                                     <button
                                         onClick={() => setAttentionWeekPage(1)}
                                         disabled={attentionWeekPage === 1}
-                                        className="p-1 rounded-lg text-gray-600 hover:bg-gray-200/60 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                                        className="p-1 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
                                         title="Weeks 7-12"
                                     >
                                         <ChevronRight size={14} />
@@ -265,7 +267,7 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                                 data={visibleAttentionData}
                                 margin={{ left: 0, right: 0, top: 10, bottom: 0 }}
                             >
-                                <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
+                                <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={isDark ? 0.15 : 0.3} stroke={isDark ? "#475569" : "#E5E7EB"} />
                                 <XAxis
                                     dataKey="week"
                                     tickLine={false}
@@ -277,8 +279,8 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                                 <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                                 <defs>
                                     <linearGradient id="fillAttention" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#1F2937" stopOpacity={0.5} />
-                                        <stop offset="95%" stopColor="#1F2937" stopOpacity={0.0} />
+                                        <stop offset="5%" stopColor={isDark ? "#94A3B8" : "#1F2937"} stopOpacity={0.5} />
+                                        <stop offset="95%" stopColor={isDark ? "#94A3B8" : "#1F2937"} stopOpacity={0.0} />
                                     </linearGradient>
                                 </defs>
                                 <Area
@@ -286,10 +288,10 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                                     type="natural"
                                     fill="url(#fillAttention)"
                                     fillOpacity={0.4}
-                                    stroke="#1F2937"
+                                    stroke={isDark ? "#94A3B8" : "#1F2937"}
                                     strokeWidth={3}
-                                    dot={{ r: 4, fill: "#FFFFFF", stroke: "#1F2937", strokeWidth: 2.5 }}
-                                    activeDot={{ r: 6, fill: "#1F2937" }}
+                                    dot={{ r: 4, fill: isDark ? "#151D2A" : "#FFFFFF", stroke: isDark ? "#94A3B8" : "#1F2937", strokeWidth: 2.5 }}
+                                    activeDot={{ r: 6, fill: isDark ? "#94A3B8" : "#1F2937" }}
                                 />
                             </AreaChart>
                         </ChartContainer>
@@ -298,14 +300,14 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
 
                 {/* Today's Schedule Section */}
                 <div className="flex flex-col gap-4 mb-4">
-                    <h2 className="text-2xl font-serif font-bold text-[#1F2328]">Today's Schedule</h2>
+                    <h2 className="text-2xl font-serif font-bold text-[#1F2328] dark:text-white">Today's Schedule</h2>
 
                     <div className="relative group">
                         {/* Left Scroll Arrow */}
                         {canScrollLeft && (
                             <button
                                 onClick={() => scrollSchedule('left')}
-                                className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 p-2.5 bg-white border border-gray-200/80 rounded-full text-gray-700 hover:bg-gray-50 transition-all shadow-md active:scale-95 flex items-center justify-center animate-in fade-in duration-200"
+                                className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 p-2.5 bg-white dark:bg-[#1E293B] border border-gray-200/80 dark:border-white/10 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#273549] transition-all shadow-md active:scale-95 flex items-center justify-center animate-in fade-in duration-200 cursor-pointer"
                                 aria-label="Scroll schedule left"
                                 title="Scroll left"
                             >
@@ -317,7 +319,7 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                         {canScrollRight && (
                             <button
                                 onClick={() => scrollSchedule('right')}
-                                className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 p-2.5 bg-white border border-gray-200/80 rounded-full text-gray-700 hover:bg-gray-50 transition-all shadow-md active:scale-95 flex items-center justify-center animate-in fade-in duration-200"
+                                className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 p-2.5 bg-white dark:bg-[#1E293B] border border-gray-200/80 dark:border-white/10 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#273549] transition-all shadow-md active:scale-95 flex items-center justify-center animate-in fade-in duration-200 cursor-pointer"
                                 aria-label="Scroll schedule right"
                                 title="Scroll right"
                             >
@@ -337,7 +339,7 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                                         onPageChange(item.pageKey);
                                     }
                                 }}
-                                className={`w-[340px] shrink-0 snap-start bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between gap-5 transition-all ${
+                                className={`w-[340px] shrink-0 snap-start bg-white dark:bg-[#151D2A] p-5 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col justify-between gap-5 transition-all ${
                                     item.hasDetails
                                         ? 'hover:shadow-md hover:scale-[1.01] active:scale-[0.99] cursor-pointer'
                                         : 'cursor-default'
@@ -346,7 +348,7 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                                 <div className="flex flex-col gap-3">
                                     <div className="flex flex-col gap-0.5">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-[11px] font-bold text-gray-400 tracking-wide uppercase">{item.code}</span>
+                                            <span className="text-[11px] font-bold text-gray-400 dark:text-gray-400 tracking-wide uppercase">{item.code}</span>
                                             <button
                                                 type="button"
                                                 aria-label="View Details"
@@ -356,14 +358,14 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                                                         onPageChange(item.pageKey);
                                                     }
                                                 }}
-                                                className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                                                className="w-7 h-7 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors cursor-pointer"
                                             >
                                                 <ChevronRight size={16} />
                                             </button>
                                         </div>
-                                        <h3 className="text-lg font-bold text-[#1F2328] leading-tight">{item.title}</h3>
+                                        <h3 className="text-lg font-bold text-[#1F2328] dark:text-white leading-tight">{item.title}</h3>
                                     </div>
-                                    <div className="flex w-fit items-center gap-1.5 text-xs text-gray-400 font-medium bg-gray-100 py-1 px-2 rounded-lg">
+                                    <div className="flex w-fit items-center gap-1.5 text-xs text-gray-400 dark:text-gray-300 font-medium bg-gray-100 dark:bg-white/5 py-1 px-2 rounded-lg">
                                         <Clock size={14} />
                                         <span>{item.time}</span>
                                     </div>
@@ -371,13 +373,13 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
 
                                 <div className="flex flex-col gap-2">
                                     <div className="flex items-center justify-between text-xs">
-                                        <span className="font-bold text-[#1F2328]">Attendance Rate</span>
+                                        <span className="font-bold text-[#1F2328] dark:text-gray-300">Attendance Rate</span>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[#1F2328] font-bold text-sm">{Math.round((item.checkedIn / item.total) * 100)}%</span>
-                                            <span className="text-gray-400 font-normal">({item.checkedIn} / {item.total})</span>
+                                            <span className="text-[#1F2328] dark:text-white font-bold text-sm">{Math.round((item.checkedIn / item.total) * 100)}%</span>
+                                            <span className="text-gray-400 dark:text-gray-400 font-normal">({item.checkedIn} / {item.total})</span>
                                         </div>
                                     </div>
-                                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                    <div className="w-full bg-gray-100 dark:bg-white/10 h-2 rounded-full overflow-hidden">
                                         <div
                                             className={`${item.checkedIn >= 40 ? 'bg-[#2D7A52]' : item.checkedIn >= 25 ? 'bg-[#EAB308]' : 'bg-[#DC2626]'} h-full rounded-full transition-all duration-300`}
                                             style={{ width: `${(item.checkedIn / item.total) * 100}%` }}
