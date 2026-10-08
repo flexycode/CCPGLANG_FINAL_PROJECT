@@ -9,7 +9,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSignIn }: LoginFormProps) {
-  const [username, setUsername] = useState('Scaluya7');
+  const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { isDark } = useTheme();
 
@@ -49,7 +49,7 @@ export default function LoginForm({ onSignIn }: LoginFormProps) {
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Ex. Scaluya7"
+                placeholder="Enter your username"
                 required
                 className={`w-full py-3 px-10 border rounded-lg text-sm transition-all focus:outline-none focus:ring-2
                   ${isDark
