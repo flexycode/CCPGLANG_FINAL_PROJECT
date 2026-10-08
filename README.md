@@ -149,7 +149,17 @@ The **Student Attendance Monitoring System** is designed to track and manage stu
 - 📊 **Reports Page** — Exportable attendance summaries with charts and tables
 - 📅 **Date & Calendar Picker** — Interactive date selection with `react-day-picker`
 - 🏫 **Multi-Class Management** — Add, remove, and switch between multiple classes in the sidebar
-- 🔐 **Authentication** — Sign-in page with session management
+- 🔐 **Authentication** — Sign-in page with session management (with blank default credentials for individual user entry)
+
+---
+
+## 🆕 Recent Updates & Fixes
+
+- **IDE & TypeScript Configuration:** Resolved TS schema validation errors by updating `target`/`lib` to `ES2022`, switching module resolution to `NodeNext`, and enforcing `strict` and `forceConsistentCasingInFileNames` for safer, cross-platform deployments.
+- **Tailwind CSS v4 & Editor Compatibility:** Added workspace `.vscode/settings.json` to properly ignore specific Tailwind CSS v4 at-rules (`@theme`, `@custom-variant`, `@apply`), eliminating false-positive CSS lint warnings.
+- **Progressive Enhancement:** Modern W3C scrollbar standards (`scrollbar-width`, `scrollbar-color`) are now properly wrapped in an `@supports` query, resolving browser compatibility warnings while retaining WebKit fallbacks.
+- **Component Stability:** Fixed a Base UI React hydration warning (`<button> cannot contain a nested <button>`) by properly wiring the `asChild` prop to Base UI's native `render={children}` delegation in `PopoverTrigger`.
+- **Sign In UX:** Cleared hardcoded default credentials from the Sign In page, offering a clean, standard input field with a proper placeholder (`"Enter your username"`).
 
 ---
 
