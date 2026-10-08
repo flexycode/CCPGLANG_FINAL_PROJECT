@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { LayoutGrid, FileText, BookOpen, Plus, LogOut, ChevronLeft, Trash2 } from 'lucide-react';
+import { LayoutGrid, FileText, BookOpen, Plus, LogOut, ChevronLeft, Trash2, Menu, X } from 'lucide-react';
 import { showToast } from './ui/toast';
 import { useTheme } from '../utils/theme';
+import { getCurrentUser, type UserProfile } from '../utils/user';
+import { addNotification } from '../utils/notifications';
 import DarkModeToggle from './DarkModeToggle';
 import logo from '../assets/checkmate_logo.jpg';
 
@@ -14,6 +16,7 @@ interface SidebarProps {
 export default function Sidebar({ onSignOut, activePage = 'Overview', onPageChange }: SidebarProps) {
     const { isDark } = useTheme();
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [activeTab, setActiveTab] = useState(activePage);
     const [showAddClassModal, setShowAddClassModal] = useState(false);
     const [newClassName, setNewClassName] = useState('');
@@ -23,6 +26,7 @@ export default function Sidebar({ onSignOut, activePage = 'Overview', onPageChan
     const [avatarUrl, setAvatarUrl] = useState<string>(
         () => localStorage.getItem('userAvatar') || '/images/teacher.png'
     );
+    const [currentUser, setCurrentUserState] = useState<UserProfile>(getCurrentUser);
 
     useEffect(() => {
         const syncAvatar = () => {
@@ -32,23 +36,33 @@ export default function Sidebar({ onSignOut, activePage = 'Overview', onPageChan
             }
         };
 
+        const syncUser = () => {
+            setCurrentUserState(getCurrentUser());
+        };
+
         window.addEventListener('userAvatarUpdated', syncAvatar);
         window.addEventListener('storage', syncAvatar);
+        window.addEventListener('checkmate_user_updated', syncUser);
+        window.addEventListener('storage', syncUser);
+
         return () => {
             window.removeEventListener('userAvatarUpdated', syncAvatar);
             window.removeEventListener('storage', syncAvatar);
+            window.removeEventListener('checkmate_user_updated', syncUser);
+            window.removeEventListener('storage', syncUser);
         };
     }, []);
 
     const [classList, setClassList] = useState([
         { name: 'Programming Languages', code: 'CCPGLANG' },
-        { name: 'Human Computer Interact...', code: 'CCINTHCI' },
+        { name: 'Human Computer Interaction', code: 'CCINTHCI' },
         { name: 'Automata Theory', code: 'CCAUTOMATA' },
         { name: 'Data Structure', code: 'CCDATRCL' },
     ]);
 
     const handleTabClick = (pageName: string) => {
         setActiveTab(pageName);
+        setIsMobileOpen(false);
         if (onPageChange) {
             onPageChange(pageName);
         }
@@ -69,6 +83,11 @@ export default function Sidebar({ onSignOut, activePage = 'Overview', onPageChan
         setNewClassCode('');
         setShowAddClassModal(false);
         showToast(`Class "${newClass.code}" added successfully!`);
+        addNotification(
+            'New Class Created',
+            `Class "${newClass.name}" (${newClass.code}) was created and added to the roster.`,
+            'class'
+        );
     };
 
     const handleRemoveClass = (index: number) => {
@@ -81,44 +100,87 @@ export default function Sidebar({ onSignOut, activePage = 'Overview', onPageChan
         setClassPendingRemoval(null);
         if (target) {
             showToast(`Class "${target.code}" removed successfully!`, 'info');
+            addNotification(
+                'Class Removed',
+                `Class "${target.name}" (${target.code}) was removed from your schedule.`,
+                'warning'
+            );
         }
     };
 
     return (
-        <aside
-            className={`flex flex-col justify-between shrink-0 border-r transition-all duration-300 ease-in-out h-screen sticky top-0 z-40 ${isCollapsed ? 'w-20 px-2 py-4' : 'w-72 p-6'
-                } ${isDark
-                    ? 'bg-[linear-gradient(180deg,#1a1a2e_0%,#16213e_34.13%,#0f3460_100%)] border-white/10'
-                    : 'bg-[linear-gradient(180deg,#E6D0C1_0%,#FFFAF6_34.13%,#EEE9E4_100%)] border-black/5'
-                }`}
-        >
-            {/* Scrollable Navigation Area */}
-            <div className="flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto pr-1">
-                {/* Logo Header & Toggle Button */}
-                <div className="flex items-center justify-between gap-1 relative z-10 min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                        <div
-                            className={`shrink-0 flex items-center justify-center rounded-xl shadow-sm overflow-hidden transition-all ${isCollapsed ? 'w-8 h-8 text-sm' : 'w-9 h-9 text-base'
-                                }`}
-                        >
-                            <img src={logo} alt="Checkmate Logo" className="w-full h-full object-cover" />
-                        </div>
-                        {!isCollapsed && (
-                            <div className="overflow-hidden whitespace-nowrap min-w-0">
-                                <h2 className={`text-xl font-bold font-serif leading-tight ${isDark ? 'text-white' : 'text-[#1F2328]'}`}>Checkmate</h2>
-                                <p className={`text-[9px] font-bold tracking-wider uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>ATTENDANCE MONITORING</p>
-                            </div>
-                        )}
-                    </div>
+        <>
+            {/* Mobile Hamburger Trigger Button (Visible only on < md screens) */}
+            <button
+                type="button"
+                onClick={() => setIsMobileOpen(true)}
+                className="md:hidden fixed top-3 left-3 z-40 p-2.5 rounded-2xl bg-white/95 dark:bg-[#151D2A]/95 border border-gray-200/80 dark:border-white/10 shadow-lg text-gray-700 dark:text-gray-200 backdrop-blur-md cursor-pointer flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                aria-label="Open Navigation Menu"
+                title="Open Menu"
+            >
+                <Menu size={20} />
+            </button>
 
-                    <button
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-                        className={`p-1.5 rounded-lg transition-all shrink-0 relative z-20 cursor-pointer ${isDark ? 'text-gray-400 hover:bg-white/10 hover:text-white' : 'text-gray-600 hover:bg-black/10 hover:text-black'}`}
-                    >
-                        <ChevronLeft size={16} className={`transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
-                    </button>
-                </div>
+            {/* Mobile Backdrop Overlay */}
+            {isMobileOpen && (
+                <div
+                    onClick={() => setIsMobileOpen(false)}
+                    className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 md:hidden animate-in fade-in duration-200"
+                />
+            )}
+
+            <aside
+                className={`fixed md:sticky top-0 left-0 z-50 md:z-40 h-screen transition-all duration-300 ease-in-out flex flex-col justify-between shrink-0 border-r ${
+                    isMobileOpen ? 'translate-x-0 shadow-2xl w-72 sm:w-80 p-5' : '-translate-x-full md:translate-x-0'
+                } ${
+                    isCollapsed ? 'md:w-20 md:px-2 md:py-4' : 'md:w-72 lg:w-76 xl:w-80 md:p-5'
+                } ${
+                    isDark
+                        ? 'bg-[linear-gradient(180deg,#1a1a2e_0%,#16213e_34.13%,#0f3460_100%)] border-white/10'
+                        : 'bg-[linear-gradient(180deg,#E6D0C1_0%,#FFFAF6_34.13%,#EEE9E4_100%)] border-black/5'
+                }`}
+            >
+                {/* Scrollable Navigation Area */}
+                <div className="flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto pr-1">
+                    {/* Logo Header & Toggle Button */}
+                    <div className="flex items-center justify-between gap-1 relative z-10 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <div
+                                className={`shrink-0 flex items-center justify-center rounded-xl shadow-sm overflow-hidden transition-all ${
+                                    isCollapsed ? 'w-8 h-8 text-sm' : 'w-9 h-9 text-base'
+                                }`}
+                            >
+                                <img src={logo} alt="Checkmate Logo" className="w-full h-full object-cover" />
+                            </div>
+                            {!isCollapsed && (
+                                <div className="overflow-hidden whitespace-nowrap min-w-0">
+                                    <h2 className={`text-xl font-bold font-serif leading-tight ${isDark ? 'text-white' : 'text-[#1F2328]'}`}>Checkmate</h2>
+                                    <p className={`text-[9px] font-bold tracking-wider uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>ATTENDANCE MONITORING</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Mobile Close Button */}
+                        <button
+                            type="button"
+                            onClick={() => setIsMobileOpen(false)}
+                            className="md:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                            aria-label="Close menu"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        {/* Desktop Collapse Toggle Button */}
+                        <button
+                            onClick={() => setIsCollapsed(!isCollapsed)}
+                            title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+                            className={`hidden md:flex p-1.5 rounded-lg transition-all shrink-0 relative z-20 cursor-pointer ${
+                                isDark ? 'text-gray-400 hover:bg-white/10 hover:text-white' : 'text-gray-600 hover:bg-black/10 hover:text-black'
+                            }`}
+                        >
+                            <ChevronLeft size={16} className={`transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
+                        </button>
+                    </div>
 
                 {/* Main Navigation */}
                 <nav className="flex flex-col gap-2 mt-2">
@@ -221,41 +283,86 @@ export default function Sidebar({ onSignOut, activePage = 'Overview', onPageChan
                 </div>
             </div>
 
-            {/* User Profile Card (Fixed at bottom) */}
+            {/* User Profile Card (Fixed at bottom) - Full Name Display without truncation */}
             <div
-                className={`mt-4 pt-4 border-t flex items-center rounded-2xl shadow-sm shrink-0 transition-all ${isCollapsed ? 'flex-col gap-3 p-2 justify-center' : 'justify-between p-3'
-                    } ${isDark ? 'border-white/10 bg-white/5' : 'border-black/5 bg-white'}`}
+                className={`mt-4 pt-3 border-t rounded-2xl shadow-sm shrink-0 transition-all ${
+                    isCollapsed ? 'flex flex-col items-center gap-2.5 p-2' : 'flex flex-col gap-2.5 p-3'
+                } ${isDark ? 'border-white/10 bg-white/5' : 'border-black/5 bg-white'}`}
             >
-                <div className={`flex items-center gap-3 overflow-hidden ${isCollapsed ? 'justify-center' : ''}`}>
-                    <div
-                        title="Prof. Susan Caluya"
-                        className="w-9 h-9 rounded-full bg-pink-100 overflow-hidden border border-gray-200/80 flex items-center justify-center shrink-0 shadow-xs"
-                    >
-                        <img
-                            src={avatarUrl}
-                            alt="Prof. Susan Caluya"
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                    {!isCollapsed && (
-                        <div className="overflow-hidden whitespace-nowrap">
-                            <p className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-[#1F2328]'}`}>Prof. Susan Caluya</p>
-                            <p className={`text-[10px] truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Computer Science</p>
-                        </div>
-                    )}
-                </div>
-                <div className="flex items-center gap-1">
-                    <DarkModeToggle className="w-8 h-8" />
-                    {onSignOut && (
-                        <button
-                            onClick={onSignOut}
-                            title="Sign Out"
-                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${isDark ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'}`}
+                {isCollapsed ? (
+                    <>
+                        <div
+                            title={currentUser.displayName}
+                            className="w-9 h-9 rounded-full bg-pink-100 overflow-hidden border border-gray-200/80 flex items-center justify-center shrink-0 shadow-xs"
                         >
-                            <LogOut size={16} />
-                        </button>
-                    )}
-                </div>
+                            <img
+                                src={avatarUrl}
+                                alt={currentUser.displayName}
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        <DarkModeToggle className="w-8 h-8" />
+                        {onSignOut && (
+                            <button
+                                onClick={onSignOut}
+                                title="Sign Out"
+                                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                                    isDark ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'
+                                }`}
+                            >
+                                <LogOut size={16} />
+                            </button>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        {/* Full Professor Profile Details - Completely Full Name, Never Truncated */}
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div
+                                title={currentUser.displayName}
+                                className="w-10 h-10 rounded-full bg-pink-100 overflow-hidden border border-gray-200/80 flex items-center justify-center shrink-0 shadow-xs"
+                            >
+                                <img
+                                    src={avatarUrl}
+                                    alt={currentUser.displayName}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p
+                                    className={`text-xs sm:text-sm font-bold leading-tight break-words ${isDark ? 'text-white' : 'text-[#1F2328]'}`}
+                                    title={currentUser.displayName}
+                                >
+                                    {currentUser.displayName}
+                                </p>
+                                <p className={`text-[10px] mt-0.5 leading-tight ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    {currentUser.department}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Account Actions Bar */}
+                        <div className="flex items-center justify-between pt-2 border-t border-black/5 dark:border-white/10">
+                            <span className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase">
+                                Account
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                                <DarkModeToggle className="w-7 h-7" />
+                                {onSignOut && (
+                                    <button
+                                        onClick={onSignOut}
+                                        title="Sign Out"
+                                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                                            isDark ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        <LogOut size={15} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* Add Class Confirmation Modal */}
@@ -365,6 +472,7 @@ export default function Sidebar({ onSignOut, activePage = 'Overview', onPageChan
                 </div>
             )}
         </aside>
+    </>
     );
 }
 

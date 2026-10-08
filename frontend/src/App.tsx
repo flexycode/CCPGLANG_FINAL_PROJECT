@@ -66,6 +66,7 @@ function App() {
       };
       return (
         <ClassDetails
+          key={currentClass.code}
           onSignOut={handleSignOut}
           onPageChange={(page) => setActivePage(page)}
           classCode={currentClass.code}
