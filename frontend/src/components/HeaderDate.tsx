@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CalendarIcon, Bell, Settings } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -6,8 +6,13 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import NotificationsModal, { type NotificationItem } from './NotificationsModal';
+import NotificationsModal from './NotificationsModal';
 import SettingsModal from './SettingsModal';
+import {
+    getStoredNotifications,
+    markAllNotificationsAsRead,
+    type NotificationItem,
+} from '../utils/notifications';
 
 export default function HeaderDate() {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -15,34 +20,25 @@ export default function HeaderDate() {
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-    const [notifications, setNotifications] = useState<NotificationItem[]>([
-        {
-            id: 1,
-            title: 'Max Absences Reached',
-            time: '10 mins ago',
-            content: 'Rinoah Dela Rama has reached 4 absences, exceeding the maximum allowed.',
-            read: false,
-        },
-        {
-            id: 2,
-            title: 'High Lates Warning',
-            time: '1 hour ago',
-            content: 'Jay Arre Talosig has 6 lates. This counts as 2 absences.',
-            read: false,
-        },
-        {
-            id: 3,
-            title: 'System Update',
-            time: '2 hours ago',
-            content: 'Attendance records synced successfully.',
-            read: true,
-        },
-    ]);
+    const [notifications, setNotifications] = useState<NotificationItem[]>(getStoredNotifications);
 
-    const hasUnread = notifications.some((item) => !item.read);
+    useEffect(() => {
+        const syncNotifications = () => {
+            setNotifications(getStoredNotifications());
+        };
+        window.addEventListener('checkmate_notifications_updated', syncNotifications);
+        window.addEventListener('storage', syncNotifications);
+        return () => {
+            window.removeEventListener('checkmate_notifications_updated', syncNotifications);
+            window.removeEventListener('storage', syncNotifications);
+        };
+    }, []);
+
+    const unreadCount = notifications.filter((item) => !item.read).length;
+    const hasUnread = unreadCount > 0;
 
     const handleMarkAllRead = () => {
-        setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
+        markAllNotificationsAsRead();
     };
 
     const currentDate = selectedDate || new Date();
@@ -77,7 +73,8 @@ export default function HeaderDate() {
                         <div className="p-1 text-gray-400 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors flex items-center justify-center">
                             <CalendarIcon size={16} />
                         </div>
-                        <span>{formatDate(currentDate)}</span>
+                        <span className="hidden sm:inline">{formatDate(currentDate)}</span>
+                        <span className="sm:hidden">{currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                         <span>•</span>
                         <span>{formatTime(currentDate)}</span>
                     </div>
@@ -105,7 +102,9 @@ export default function HeaderDate() {
                 >
                     <Bell size={18} />
                     {hasUnread && (
-                        <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-blue-500 animate-in zoom-in duration-200"></span>
+                        <span className="absolute top-1.5 right-1.5 min-w-[15px] h-[15px] px-0.5 rounded-full bg-blue-500 text-white text-[9px] font-bold flex items-center justify-center animate-in zoom-in duration-200 shadow-xs">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
                     )}
                 </button>
                 <button

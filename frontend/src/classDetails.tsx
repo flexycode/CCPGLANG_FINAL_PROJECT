@@ -5,6 +5,7 @@ import HeaderDate from './components/HeaderDate';
 import { TimePicker } from '@/components/ui/time-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { showToast } from '@/components/ui/toast';
+import { addNotification } from './utils/notifications';
 
 interface ClassDetailsProps {
     onSignOut?: () => void;
@@ -23,15 +24,60 @@ interface Student {
     remarks: string;
 }
 
-const initialStudents: Student[] = [
-    { no: '01', name: 'Castro, James Adrian', studentId: '2022-348291', status: 'Present', checkIn: '2:59 PM', remarks: '' },
-    { no: '02', name: 'Cunanan, Marco Polo', studentId: '2022-348291', status: 'Select status', checkIn: '', remarks: '' },
-    { no: '03', name: 'Dela Rama, Rinoah Venedict', studentId: '2022-348291', status: 'Select status', checkIn: '', remarks: '' },
-    { no: '04', name: 'Glodo, Jannah Cleine', studentId: '2022-348291', status: 'Absent', checkIn: '', remarks: 'Sick' },
-    { no: '05', name: 'Marisga, Jersey Mae', studentId: '2022-348291', status: 'Late', checkIn: '', remarks: 'Traffic' },
-    { no: '06', name: 'Poserio, Jed Nathan', studentId: '2022-348291', status: 'Present', checkIn: '', remarks: '' },
-    { no: '07', name: 'Talosig, Jay Arre', studentId: '2022-348291', status: 'Select status', checkIn: '', remarks: '' },
-];
+const initialStudentsByClass: Record<string, Student[]> = {
+    CCPGLANG: [
+        { no: '01', name: 'Castro, James Adrian', studentId: '2022-348291', status: 'Present', checkIn: '2:59 PM', remarks: '' },
+        { no: '02', name: 'Cunanan, Marco Polo', studentId: '2022-340291', status: 'Select status', checkIn: '', remarks: '' },
+        { no: '03', name: 'Dela Rama, Rinoah Venedict', studentId: '2022-348291', status: 'Select status', checkIn: '', remarks: '' },
+        { no: '04', name: 'Glodo, Jannah Cleine', studentId: '2022-348291', status: 'Absent', checkIn: '', remarks: 'Sick' },
+        { no: '05', name: 'Marisga, Jersey Mae', studentId: '2022-348291', status: 'Late', checkIn: '', remarks: 'Traffic' },
+        { no: '06', name: 'Poserio, Jed Nathan', studentId: '2022-340291', status: 'Present', checkIn: '', remarks: '' },
+        { no: '07', name: 'Talosig, Jay Arre', studentId: '2022-340291', status: 'Select status', checkIn: '', remarks: '' },
+    ],
+    CCINTHCI: [
+        { no: '01', name: 'Castro, James Adrian', studentId: '2022-348291', status: 'Present', checkIn: '8:05 AM', remarks: '' },
+        { no: '02', name: 'Cunanan, Marco Polo', studentId: '2022-340291', status: 'Present', checkIn: '8:10 AM', remarks: '' },
+        { no: '03', name: 'Dela Rama, Rinoah Venedict', studentId: '2022-348291', status: 'Absent', checkIn: '', remarks: 'Family emergency' },
+        { no: '04', name: 'Glodo, Jannah Cleine', studentId: '2022-348291', status: 'Present', checkIn: '8:02 AM', remarks: '' },
+        { no: '05', name: 'Marisga, Jersey Mae', studentId: '2022-348291', status: 'Late', checkIn: '8:35 AM', remarks: 'Bus delay' },
+        { no: '06', name: 'Poserio, Jed Nathan', studentId: '2022-340291', status: 'Present', checkIn: '8:00 AM', remarks: '' },
+        { no: '07', name: 'Talosig, Jay Arre', studentId: '2022-340291', status: 'Excused', checkIn: '', remarks: 'Student council meeting' },
+    ],
+    CCAUTOMATA: [
+        { no: '01', name: 'Castro, James Adrian', studentId: '2022-348291', status: 'Present', checkIn: '10:00 AM', remarks: '' },
+        { no: '02', name: 'Cunanan, Marco Polo', studentId: '2022-340291', status: 'Late', checkIn: '10:25 AM', remarks: 'Heavy traffic' },
+        { no: '03', name: 'Dela Rama, Rinoah Venedict', studentId: '2022-348291', status: 'Present', checkIn: '10:02 AM', remarks: '' },
+        { no: '04', name: 'Glodo, Jannah Cleine', studentId: '2022-348291', status: 'Present', checkIn: '10:05 AM', remarks: '' },
+        { no: '05', name: 'Marisga, Jersey Mae', studentId: '2022-348291', status: 'Absent', checkIn: '', remarks: 'Medical checkup' },
+        { no: '06', name: 'Poserio, Jed Nathan', studentId: '2022-340291', status: 'Present', checkIn: '10:01 AM', remarks: '' },
+        { no: '07', name: 'Talosig, Jay Arre', studentId: '2022-340291', status: 'Present', checkIn: '10:12 AM', remarks: '' },
+    ],
+    CCDATRCL: [
+        { no: '01', name: 'Castro, James Adrian', studentId: '2022-348291', status: 'Present', checkIn: '1:00 PM', remarks: '' },
+        { no: '02', name: 'Cunanan, Marco Polo', studentId: '2022-340291', status: 'Present', checkIn: '1:05 PM', remarks: '' },
+        { no: '03', name: 'Dela Rama, Rinoah Venedict', studentId: '2022-348291', status: 'Present', checkIn: '1:03 PM', remarks: '' },
+        { no: '04', name: 'Glodo, Jannah Cleine', studentId: '2022-348291', status: 'Absent', checkIn: '', remarks: 'Fever' },
+        { no: '05', name: 'Marisga, Jersey Mae', studentId: '2022-348291', status: 'Late', checkIn: '1:20 PM', remarks: 'Train delay' },
+        { no: '06', name: 'Poserio, Jed Nathan', studentId: '2022-340291', status: 'Present', checkIn: '1:01 PM', remarks: '' },
+        { no: '07', name: 'Talosig, Jay Arre', studentId: '2022-340291', status: 'Present', checkIn: '1:08 PM', remarks: '' },
+    ],
+};
+
+const getInitialStudentsForClass = (code: string): Student[] => {
+    const normalized = code === 'CCAUTOMA' ? 'CCAUTOMATA' : code;
+    try {
+        const saved = localStorage.getItem(`checkmate_students_${normalized}`);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                return parsed;
+            }
+        }
+    } catch {
+        // fallback to defaults
+    }
+    return initialStudentsByClass[normalized] || initialStudentsByClass['CCPGLANG'];
+};
 
 const initialPointData: Record<string, { lates: number; absences: number; status: 'Pass' | 'Warning' | 'Fail'; weeks: { dots: string[] }[] }> = {
     '01': {
@@ -194,22 +240,31 @@ export default function ClassDetails({
     classNameTitle = 'Programming Languages',
     fullCode,
 }: ClassDetailsProps) {
-    const [students, setStudents] = useState<Student[]>(initialStudents);
+    const normalizedCode = classCode === 'CCAUTOMA' ? 'CCAUTOMATA' : classCode;
+    const [students, setStudents] = useState<Student[]>(() => getInitialStudentsForClass(normalizedCode));
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState<'daily' | 'points'>('daily');
     const [showAddModal, setShowAddModal] = useState(false);
     const [showRemoveModal, setShowRemoveModal] = useState(false);
     const [removeSearchQuery, setRemoveSearchQuery] = useState('');
-    const [studentPendingRemoval, setStudentPendingRemoval] = useState<{ index: number; name: string; studentId: string } | null>(null);
+    const [studentPendingRemoval, setStudentPendingRemoval] = useState<{ no: string; name: string; studentId: string } | null>(null);
     const [activeCardModal, setActiveCardModal] = useState<'Enrolled' | 'Present' | 'Absent' | 'Late' | 'Excused' | null>(null);
     const [newStudentName, setNewStudentName] = useState('');
     const [newStudentId, setNewStudentId] = useState('');
 
-    // Dynamic counts calculation based on students list state
-    const totalEnrolled = 40;
-    const presentCount = students.filter(s => s.status === 'Present').length + 33;
-    const absentCount = students.filter(s => s.status === 'Absent').length + 4;
-    const lateCount = students.filter(s => s.status === 'Late').length + 2;
+    const saveClassStudents = (updated: Student[]) => {
+        try {
+            localStorage.setItem(`checkmate_students_${normalizedCode}`, JSON.stringify(updated));
+        } catch {
+            // ignore
+        }
+    };
+
+    // Truly dynamic counts calculation synchronized with the class's enrolled students list
+    const totalEnrolled = students.length;
+    const presentCount = students.filter(s => s.status === 'Present').length;
+    const absentCount = students.filter(s => s.status === 'Absent').length;
+    const lateCount = students.filter(s => s.status === 'Late').length;
     const excusedCount = students.filter(s => s.status === 'Excused').length;
 
     const filteredStudents = students.filter(
@@ -226,33 +281,45 @@ export default function ClassDetails({
 
     const modalStudentsList = getModalStudents();
 
-    const handleStatusChange = (index: number, newStatus: Student['status']) => {
-        const updated = [...students];
-        updated[index].status = newStatus;
-        if (newStatus === 'Present' && !updated[index].checkIn) {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
-            updated[index].checkIn = `${hours}:${minutes} ${ampm}`;
-        }
+    const handleStatusChange = (studentNo: string, newStatus: Student['status']) => {
+        const updated = students.map(s => {
+            if (s.no === studentNo) {
+                const sCopy = { ...s, status: newStatus };
+                if (newStatus === 'Present' && !sCopy.checkIn) {
+                    const now = new Date();
+                    let hours = now.getHours();
+                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12 || 12;
+                    sCopy.checkIn = `${hours}:${minutes} ${ampm}`;
+                }
+                return sCopy;
+            }
+            return s;
+        });
         setStudents(updated);
+        saveClassStudents(updated);
     };
 
-    const handleRemarksChange = (index: number, remarks: string) => {
-        const updated = [...students];
-        updated[index].remarks = remarks;
+    const handleRemarksChange = (studentNo: string, remarks: string) => {
+        const updated = students.map(s => s.no === studentNo ? { ...s, remarks } : s);
         setStudents(updated);
+        saveClassStudents(updated);
     };
 
-    const handleFormattedTimeChange = (index: number, formattedTime: string) => {
-        const updated = [...students];
-        updated[index].checkIn = formattedTime;
-        if (updated[index].status === 'Select status') {
-            updated[index].status = 'Present';
-        }
+    const handleFormattedTimeChange = (studentNo: string, formattedTime: string) => {
+        const updated = students.map(s => {
+            if (s.no === studentNo) {
+                const sCopy = { ...s, checkIn: formattedTime };
+                if (sCopy.status === 'Select status') {
+                    sCopy.status = 'Present';
+                }
+                return sCopy;
+            }
+            return s;
+        });
         setStudents(updated);
+        saveClassStudents(updated);
     };
 
     const handleAddStudent = (e: React.FormEvent) => {
@@ -260,29 +327,42 @@ export default function ClassDetails({
         if (!newStudentName.trim()) return;
         const newNo = (students.length + 1).toString().padStart(2, '0');
         const addedName = newStudentName.trim();
-        setStudents([
-            ...students,
-            {
-                no: newNo,
-                name: addedName,
-                studentId: newStudentId.trim() || '2022-348291',
-                status: 'Select status',
-                checkIn: '',
-                remarks: '',
-            },
-        ]);
+        const newStudent: Student = {
+            no: newNo,
+            name: addedName,
+            studentId: newStudentId.trim() || '2022-348291',
+            status: 'Select status',
+            checkIn: '',
+            remarks: '',
+        };
+        const updated = [...students, newStudent];
+        setStudents(updated);
+        saveClassStudents(updated);
         setNewStudentName('');
         setNewStudentId('');
         setShowAddModal(false);
         showToast(`Student "${addedName}" added successfully!`);
+        addNotification(
+            'New Student Enrolled',
+            `Student "${addedName}" (${newStudent.studentId}) was enrolled into ${classNameTitle}.`,
+            'student'
+        );
     };
 
-    const handleRemoveStudent = (index: number) => {
-        const target = students[index];
-        const updated = students.filter((_, i) => i !== index);
+    const handleRemoveStudent = (studentNo: string) => {
+        const target = students.find(s => s.no === studentNo);
+        const updated = students
+            .filter(s => s.no !== studentNo)
+            .map((s, idx) => ({ ...s, no: (idx + 1).toString().padStart(2, '0') }));
         setStudents(updated);
+        saveClassStudents(updated);
         if (target) {
             showToast(`Student "${target.name}" removed successfully!`, 'info');
+            addNotification(
+                'Student Removed',
+                `Student "${target.name}" (${target.studentId}) was removed from ${classNameTitle}.`,
+                'warning'
+            );
         }
     };
 
@@ -290,19 +370,19 @@ export default function ClassDetails({
         <div className="flex h-screen w-full bg-[#FFFBF4] dark:bg-[#0B132B] text-[#1F2328] dark:text-slate-100 font-sans overflow-hidden transition-colors duration-200">
             <Sidebar onSignOut={onSignOut} activePage={classCode} onPageChange={onPageChange} />
 
-            {/* Main Content Area */}
-            <main className="flex-1 p-8 overflow-y-auto max-w-7xl mx-auto flex flex-col gap-7 h-full">
+            {/* Main Content Area - Fluid & Widespread for all devices */}
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 xl:p-10 pt-16 md:pt-8 overflow-y-auto w-full max-w-[1700px] 2xl:max-w-[1920px] mx-auto flex flex-col gap-6 md:gap-7 h-full">
                 {/* Header & Title Group */}
-                <div className="flex flex-col gap-1">
-                    <header className="flex items-center justify-between">
+                <div className="flex flex-col gap-2">
+                    <header className="flex items-center justify-between w-full">
                         <HeaderDate />
                     </header>
 
                     <div>
-                        <h1 className="text-4xl font-serif font-bold text-[#1F2328] dark:text-white tracking-tight">
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#1F2328] dark:text-white tracking-tight">
                             {activeTab === 'points' ? 'Attendance Point' : classNameTitle}
                         </h1>
-                        <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 mt-1">
                             {activeTab === 'points'
                                 ? 'Manage daily student attendance and track semester point.'
                                 : fullCode || `${classCode} - COM232`}
@@ -310,55 +390,55 @@ export default function ClassDetails({
                     </div>
                 </div>
 
-                {/* Section 1: Soft Pastel Stat Cards Grid (5 Square Cards) */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                {/* Section 1: Soft Pastel Stat Cards Grid (5 Responsive Cards) */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 w-full">
                     {/* Stat Card 1: Enrolled */}
                     <div
                         onClick={() => setActiveCardModal('Enrolled')}
-                        className="bg-[#DFE7F1] dark:bg-[#192740] dark:border dark:border-[#2B4C7E]/40 p-5 rounded-[20px] aspect-square flex flex-col items-center justify-center text-center gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none"
+                        className="bg-[#DFE7F1] dark:bg-[#192740] dark:border dark:border-[#2B4C7E]/40 p-4 sm:p-5 rounded-[22px] flex flex-col items-center justify-center text-center gap-1.5 sm:gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none min-h-[115px] sm:min-h-[130px]"
                     >
-                        <Users size={38} className="text-[#2B4C7E] dark:text-[#93C5FD] stroke-[2]" />
-                        <span className="text-3xl sm:text-4xl font-bold text-[#2B4C7E] dark:text-[#93C5FD] leading-none">{totalEnrolled}</span>
+                        <Users className="w-8 h-8 sm:w-9 sm:h-9 text-[#2B4C7E] dark:text-[#93C5FD] stroke-[2]" />
+                        <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#2B4C7E] dark:text-[#93C5FD] leading-none">{totalEnrolled}</span>
                         <span className="text-xs sm:text-sm font-semibold text-[#2B4C7E] dark:text-[#93C5FD] mt-0.5">Enrolled</span>
                     </div>
 
                     {/* Stat Card 2: Present */}
                     <div
                         onClick={() => setActiveCardModal('Present')}
-                        className="bg-[#E5F5EA] dark:bg-[#132E1D] dark:border dark:border-[#1E7E34]/40 p-5 rounded-[20px] aspect-square flex flex-col items-center justify-center text-center gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none"
+                        className="bg-[#E5F5EA] dark:bg-[#132E1D] dark:border dark:border-[#1E7E34]/40 p-4 sm:p-5 rounded-[22px] flex flex-col items-center justify-center text-center gap-1.5 sm:gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none min-h-[115px] sm:min-h-[130px]"
                     >
-                        <CheckCircle2 size={38} className="text-[#1E7E34] dark:text-[#86EFAC] stroke-[2]" />
-                        <span className="text-3xl sm:text-4xl font-bold text-[#1E7E34] dark:text-[#86EFAC] leading-none">{presentCount}</span>
+                        <CheckCircle2 className="w-8 h-8 sm:w-9 sm:h-9 text-[#1E7E34] dark:text-[#86EFAC] stroke-[2]" />
+                        <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1E7E34] dark:text-[#86EFAC] leading-none">{presentCount}</span>
                         <span className="text-xs sm:text-sm font-semibold text-[#1E7E34] dark:text-[#86EFAC] mt-0.5">Present</span>
                     </div>
 
                     {/* Stat Card 3: Absent */}
                     <div
                         onClick={() => setActiveCardModal('Absent')}
-                        className="bg-[#FCE8E7] dark:bg-[#341619] dark:border dark:border-[#D93838]/40 p-5 rounded-[20px] aspect-square flex flex-col items-center justify-center text-center gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none"
+                        className="bg-[#FCE8E7] dark:bg-[#341619] dark:border dark:border-[#D93838]/40 p-4 sm:p-5 rounded-[22px] flex flex-col items-center justify-center text-center gap-1.5 sm:gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none min-h-[115px] sm:min-h-[130px]"
                     >
-                        <UserX size={38} className="text-[#D93838] dark:text-[#FCA5A5] stroke-[2]" />
-                        <span className="text-3xl sm:text-4xl font-bold text-[#D93838] dark:text-[#FCA5A5] leading-none">{absentCount}</span>
+                        <UserX className="w-8 h-8 sm:w-9 sm:h-9 text-[#D93838] dark:text-[#FCA5A5] stroke-[2]" />
+                        <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#D93838] dark:text-[#FCA5A5] leading-none">{absentCount}</span>
                         <span className="text-xs sm:text-sm font-semibold text-[#D93838] dark:text-[#FCA5A5] mt-0.5">Absent</span>
                     </div>
 
                     {/* Stat Card 4: Late */}
                     <div
                         onClick={() => setActiveCardModal('Late')}
-                        className="bg-[#F4EF94] dark:bg-[#322A0C] dark:border dark:border-[#EAB308]/40 p-5 rounded-[20px] aspect-square flex flex-col items-center justify-center text-center gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none"
+                        className="bg-[#F4EF94] dark:bg-[#322A0C] dark:border dark:border-[#EAB308]/40 p-4 sm:p-5 rounded-[22px] flex flex-col items-center justify-center text-center gap-1.5 sm:gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none min-h-[115px] sm:min-h-[130px]"
                     >
-                        <Clock size={38} className="text-[#7A6800] dark:text-[#FDE047] stroke-[2]" />
-                        <span className="text-3xl sm:text-4xl font-bold text-[#7A6800] dark:text-[#FDE047] leading-none">{lateCount}</span>
+                        <Clock className="w-8 h-8 sm:w-9 sm:h-9 text-[#7A6800] dark:text-[#FDE047] stroke-[2]" />
+                        <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#7A6800] dark:text-[#FDE047] leading-none">{lateCount}</span>
                         <span className="text-xs sm:text-sm font-semibold text-[#7A6800] dark:text-[#FDE047] mt-0.5">Late</span>
                     </div>
 
                     {/* Stat Card 5: Excused */}
                     <div
                         onClick={() => setActiveCardModal('Excused')}
-                        className="bg-[#EDE9FE] dark:bg-[#271945] dark:border dark:border-[#8B5CF6]/40 p-5 rounded-[20px] aspect-square flex flex-col items-center justify-center text-center gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none"
+                        className="col-span-2 sm:col-span-1 bg-[#EDE9FE] dark:bg-[#271945] dark:border dark:border-[#8B5CF6]/40 p-4 sm:p-5 rounded-[22px] flex flex-col items-center justify-center text-center gap-1.5 sm:gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none min-h-[115px] sm:min-h-[130px]"
                     >
-                        <FileText size={38} className="text-[#6D28D9] dark:text-[#D8B4FE] stroke-[2]" />
-                        <span className="text-3xl sm:text-4xl font-bold text-[#6D28D9] dark:text-[#D8B4FE] leading-none">{excusedCount}</span>
+                        <FileText className="w-8 h-8 sm:w-9 sm:h-9 text-[#6D28D9] dark:text-[#D8B4FE] stroke-[2]" />
+                        <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#6D28D9] dark:text-[#D8B4FE] leading-none">{excusedCount}</span>
                         <span className="text-xs sm:text-sm font-semibold text-[#6D28D9] dark:text-[#D8B4FE] mt-0.5">Excused</span>
                     </div>
                 </div>
@@ -432,9 +512,9 @@ export default function ClassDetails({
 
                 {/* Section 3: Attendees Table Card */}
                 {activeTab === 'daily' ? (
-                    <div className="bg-white dark:bg-[#151D2A] rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm p-6 flex flex-col justify-between mb-6">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                    <div className="bg-white dark:bg-[#151D2A] rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm p-4 sm:p-6 flex flex-col justify-between mb-6">
+                        <div className="overflow-x-auto w-full">
+                            <table className="w-full min-w-[580px] text-left border-collapse">
                                 <thead>
                                     <tr className="text-[11px] font-semibold text-gray-400 dark:text-gray-400 border-b border-gray-100 dark:border-white/10 pb-3">
                                         <th className="py-3 px-2 font-medium w-14">No.</th>
@@ -445,7 +525,7 @@ export default function ClassDetails({
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 dark:divide-white/5">
-                                    {filteredStudents.map((student, index) => (
+                                    {filteredStudents.map((student) => (
                                         <tr key={student.no + student.name} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
                                             <td className="py-4 px-2 text-xs text-gray-400 dark:text-gray-500 font-medium">{student.no}</td>
                                             <td className="py-4 px-2">
@@ -457,7 +537,7 @@ export default function ClassDetails({
                                             <td className="py-4 px-2">
                                                 <StatusCombobox
                                                     value={student.status}
-                                                    onChange={(newStatus) => handleStatusChange(index, newStatus)}
+                                                    onChange={(newStatus) => handleStatusChange(student.no, newStatus)}
                                                 />
                                             </td>
                                             <td className="py-4 px-2">
@@ -467,7 +547,7 @@ export default function ClassDetails({
                                                     ) : null}
                                                     <TimePicker
                                                         value={student.checkIn}
-                                                        onChange={(formatted) => handleFormattedTimeChange(index, formatted)}
+                                                        onChange={(formatted) => handleFormattedTimeChange(student.no, formatted)}
                                                     />
                                                 </div>
                                             </td>
@@ -477,13 +557,13 @@ export default function ClassDetails({
                                                         type="text"
                                                         placeholder="Add remarks..."
                                                         value={student.remarks}
-                                                        onChange={(e) => handleRemarksChange(index, e.target.value)}
+                                                        onChange={(e) => handleRemarksChange(student.no, e.target.value)}
                                                         className="w-full text-xs font-medium text-gray-700 dark:text-gray-200 bg-transparent border-none placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:ring-0 pr-2"
                                                     />
                                                     {student.remarks ? (
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleRemarksChange(index, '')}
+                                                            onClick={() => handleRemarksChange(student.no, '')}
                                                             title="Delete remarks"
                                                             className="p-1 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all cursor-pointer shrink-0 flex items-center gap-1"
                                                         >
@@ -504,9 +584,9 @@ export default function ClassDetails({
                     </div>
                 ) : (
                     /* Attendance Point View Table */
-                    <div className="bg-white dark:bg-[#151D2A] rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm p-6 flex flex-col justify-between mb-6 animate-in fade-in duration-200">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                    <div className="bg-white dark:bg-[#151D2A] rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm p-4 sm:p-6 flex flex-col justify-between mb-6 animate-in fade-in duration-200">
+                        <div className="overflow-x-auto w-full">
+                            <table className="w-full min-w-[760px] text-left border-collapse">
                                 <thead>
                                     <tr className="text-[11px] font-semibold text-gray-400 dark:text-gray-400 border-b border-gray-100 dark:border-white/10 pb-3">
                                         <th className="py-3 px-2 font-medium w-12">No.</th>
@@ -716,7 +796,6 @@ export default function ClassDetails({
                                 students
                                     .filter(s => s.name.toLowerCase().includes(removeSearchQuery.toLowerCase()) || s.studentId.includes(removeSearchQuery))
                                     .map((student) => {
-                                        const originalIndex = students.findIndex(s => s.studentId === student.studentId && s.name === student.name);
                                         return (
                                             <div key={student.no + student.name} className="pt-2.5 first:pt-0 flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
@@ -731,7 +810,7 @@ export default function ClassDetails({
                                                 <button
                                                     onClick={() => {
                                                         setStudentPendingRemoval({
-                                                            index: originalIndex,
+                                                            no: student.no,
                                                             name: student.name,
                                                             studentId: student.studentId,
                                                         });
@@ -790,7 +869,7 @@ export default function ClassDetails({
                             </button>
                             <button
                                 onClick={() => {
-                                    handleRemoveStudent(studentPendingRemoval.index);
+                                    handleRemoveStudent(studentPendingRemoval.no);
                                     setStudentPendingRemoval(null);
                                 }}
                                 className="px-5 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-sm transition-all cursor-pointer"

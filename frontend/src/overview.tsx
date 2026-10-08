@@ -9,6 +9,7 @@ import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 import Sidebar from './components/Sidebar';
 import HeaderDate from './components/HeaderDate';
 import { useTheme } from './utils/theme';
+import { getCurrentUser, type UserProfile } from './utils/user';
 import {
     ChartContainer,
     ChartTooltip,
@@ -83,8 +84,21 @@ const renderCustomAxisTick = ({ x, y, payload }: any) => {
 
 export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
     const { isDark } = useTheme();
+    const [currentUser, setCurrentUser] = useState<UserProfile>(getCurrentUser);
     const [attendanceWeekPage, setAttendanceWeekPage] = useState<number>(0);
     const [attentionWeekPage, setAttentionWeekPage] = useState<number>(0);
+
+    useEffect(() => {
+        const syncUser = () => {
+            setCurrentUser(getCurrentUser());
+        };
+        window.addEventListener('checkmate_user_updated', syncUser);
+        window.addEventListener('storage', syncUser);
+        return () => {
+            window.removeEventListener('checkmate_user_updated', syncUser);
+            window.removeEventListener('storage', syncUser);
+        };
+    }, []);
 
     const visibleAttendanceData = attendanceData.slice(attendanceWeekPage * 6, (attendanceWeekPage + 1) * 6);
     const visibleAttentionData = attentionData.slice(attentionWeekPage * 6, (attentionWeekPage + 1) * 6);
@@ -133,38 +147,38 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
         <div className="flex h-screen w-full bg-[#FFFBF4] dark:bg-[#0B132B] text-[#1F2328] dark:text-slate-100 font-sans overflow-hidden transition-colors duration-200">
             <Sidebar onSignOut={onSignOut} activePage="Overview" onPageChange={onPageChange} />
 
-            {/* Main Content Area */}
-            <main className="flex-1 p-8 overflow-y-auto max-w-7xl mx-auto flex flex-col gap-8 h-full">
+            {/* Main Content Area - Fluid & Widespread for PC, Tablet & Mobile */}
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 xl:p-10 pt-16 md:pt-8 overflow-y-auto w-full max-w-[1700px] 2xl:max-w-[1920px] mx-auto flex flex-col gap-6 md:gap-8 h-full">
                 {/* Header & Greeting Group */}
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                     {/* Top Header Row */}
-                    <header className="flex items-center justify-between">
+                    <header className="flex items-center justify-between w-full">
                         <HeaderDate />
                     </header>
 
                     {/* Greeting Section */}
                     <div>
-                        <h1 className="text-4xl font-serif font-bold text-[#1F2328] dark:text-white tracking-tight">
-                            Good morning, Prof. Caluya
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#1F2328] dark:text-white tracking-tight">
+                            Good morning, {currentUser.title}
                         </h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
                             You have 3 classes scheduled today.
                         </p>
                     </div>
                 </div>
 
                 {/* Search Bar */}
-                <div className="relative max-w-xl">
+                <div className="relative w-full max-w-xl lg:max-w-2xl">
                     <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                     <input
                         type="text"
                         placeholder="Quick search a student or class"
-                        className="w-full pl-11 pr-4 py-3 bg-white dark:bg-[#151D2A] border border-gray-200/80 dark:border-white/10 rounded-full text-sm text-[#1F2328] dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-blue-500 shadow-sm transition-all"
+                        className="w-full pl-11 pr-4 py-3 bg-white dark:bg-[#151D2A] border border-gray-200/80 dark:border-white/10 rounded-full text-xs sm:text-sm text-[#1F2328] dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-blue-500 shadow-sm transition-all"
                     />
                 </div>
 
-                {/* Charts Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Charts Grid - Spreads out cleanly across widescreen and stacks neatly on mobile */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 w-full">
                     {/* Chart 1: Overall Attendance */}
                     <div className="bg-white dark:bg-[#151D2A] p-6 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col gap-4 transition-colors">
                         <div className="flex items-center justify-between">
@@ -329,7 +343,7 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
 
                         <div
                             ref={scheduleRef}
-                            className="flex gap-5 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                            className="flex gap-4 sm:gap-5 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scroll-smooth w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                         >
                         {todaySchedule.map((item) => (
                             <div
@@ -339,7 +353,7 @@ export default function Overview({ onSignOut, onPageChange }: OverviewProps) {
                                         onPageChange(item.pageKey);
                                     }
                                 }}
-                                className={`w-[340px] shrink-0 snap-start bg-white dark:bg-[#151D2A] p-5 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col justify-between gap-5 transition-all ${
+                                className={`w-[290px] sm:w-[320px] lg:flex-1 lg:min-w-[270px] lg:max-w-[360px] xl:max-w-[390px] shrink-0 snap-start bg-white dark:bg-[#151D2A] p-5 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col justify-between gap-5 transition-all ${
                                     item.hasDetails
                                         ? 'hover:shadow-md hover:scale-[1.01] active:scale-[0.99] cursor-pointer'
                                         : 'cursor-default'

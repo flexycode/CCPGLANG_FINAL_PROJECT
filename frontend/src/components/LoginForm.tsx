@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
 import { User, Lock, EyeOff, Eye, LogIn } from 'lucide-react';
 import { useTheme } from '../utils/theme';
+import { setCurrentUser } from '../utils/user';
+import { addNotification } from '../utils/notifications';
 
 interface LoginFormProps {
   onSignIn?: () => void;
 }
 
 export default function LoginForm({ onSignIn }: LoginFormProps) {
+  const [username, setUsername] = useState('Scaluya7');
   const [showPassword, setShowPassword] = useState(false);
   const { isDark } = useTheme();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const user = setCurrentUser(username);
+    addNotification(
+      'User Authenticated',
+      `${user.displayName} (${user.username}) successfully signed in to Checkmate Monitoring System.`,
+      'user'
+    );
     if (onSignIn) {
       onSignIn();
     }
@@ -38,6 +47,8 @@ export default function LoginForm({ onSignIn }: LoginFormProps) {
               <input
                 type="text"
                 id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 placeholder="Ex. Scaluya7"
                 required
                 className={`w-full py-3 px-10 border rounded-lg text-sm transition-all focus:outline-none focus:ring-2

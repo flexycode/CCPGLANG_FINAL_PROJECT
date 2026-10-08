@@ -16,18 +16,67 @@
 
 /* Custom subtle scrollbar inside website container */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.3);
+  background: rgba(156, 163, 175, 0.4);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.5);
+  background: rgba(156, 163, 175, 0.7);
+}
+
+/* Visible, grab-able, accessible scrollbar for landing page and non-wheel users */
+@supports (scrollbar-width: thin) {
+  .landing-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(140, 150, 165, 0.75) rgba(0, 0, 0, 0.08);
+  }
+  .dark .landing-scrollbar {
+    scrollbar-color: rgba(180, 190, 205, 0.6) rgba(255, 255, 255, 0.08);
+  }
+}
+.landing-scrollbar::-webkit-scrollbar {
+  width: 14px;
+}
+.landing-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.08);
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
+.dark .landing-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+.landing-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(140, 150, 165, 0.75);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.landing-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.95);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.dark .landing-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(180, 190, 205, 0.6);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.dark .landing-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(226, 232, 240, 0.9);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.landing-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #f59e0b;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 @theme inline {

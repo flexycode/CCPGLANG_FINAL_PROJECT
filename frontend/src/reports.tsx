@@ -183,27 +183,27 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
         <div className="flex h-screen w-full bg-[#FFFBF4] dark:bg-[#0B132B] text-[#1F2328] dark:text-slate-100 font-sans overflow-hidden transition-colors duration-200">
             <Sidebar onSignOut={onSignOut} activePage="Reports" onPageChange={onPageChange} />
 
-            {/* Main Content Area */}
-            <main className="flex-1 p-8 overflow-y-auto max-w-7xl mx-auto flex flex-col gap-8 h-full">
+            {/* Main Content Area - Fluid & Widespread */}
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 xl:p-10 pt-16 md:pt-8 overflow-y-auto w-full max-w-[1700px] 2xl:max-w-[1920px] mx-auto flex flex-col gap-6 md:gap-8 h-full">
                 {/* Header & Title Group */}
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                     {/* Top Header Row */}
-                    <header className="flex items-center justify-between">
+                    <header className="flex items-center justify-between w-full">
                         <HeaderDate />
                     </header>
 
                     {/* Page Title & Action Button */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div>
-                            <h1 className="text-4xl font-serif font-bold text-[#1F2328] dark:text-white tracking-tight">
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#1F2328] dark:text-white tracking-tight">
                                 Reports & Analytics
                             </h1>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">
                                 View and export detailed class attendance summary.
                             </p>
                         </div>
 
-                        <button className="flex items-center gap-2 px-5 py-2.5 bg-[#1F2328] dark:bg-blue-600 text-white text-sm font-medium rounded-2xl shadow-sm hover:bg-black dark:hover:bg-blue-700 transition-all cursor-pointer">
+                        <button className="flex items-center gap-2 px-5 py-2.5 bg-[#1F2328] dark:bg-blue-600 text-white text-xs sm:text-sm font-medium rounded-2xl shadow-sm hover:bg-black dark:hover:bg-blue-700 transition-all cursor-pointer shrink-0">
                             <Download size={16} />
                             <span>Export Report</span>
                         </button>
@@ -211,7 +211,7 @@ export default function Reports({ onSignOut, onPageChange }: ReportsProps) {
                 </div>
 
                 {/* Section 1: Summary Metric Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
                     {/* Stat Card 1 */}
                     <div className="bg-white dark:bg-[#151D2A] p-6 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm flex flex-col justify-between gap-3 transition-colors">
                         <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Semester Average</span>
