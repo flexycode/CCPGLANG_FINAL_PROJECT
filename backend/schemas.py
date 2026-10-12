@@ -17,6 +17,7 @@ These complement the SQLAlchemy models (db_models.py):
 from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel, Field
+from typing import Optional
 
 
 # ─── Enums ────────────────────────────────────────────────────────────
@@ -37,6 +38,13 @@ class StudentStatusEnum(str, Enum):
     suspended = "suspended"
 
 
+class CalendarEventTypeEnum(str, Enum):
+    """Valid calendar event types."""
+    holiday = "holiday"
+    suspension = "suspension"
+    professor_excuse = "professor_excuse"
+
+
 # ─── Student Schemas ──────────────────────────────────────────────────
 
 class StudentCreate(BaseModel):
@@ -54,6 +62,8 @@ class StudentResponse(BaseModel):
     last_name: str
     status: StudentStatusEnum
     enrolled_date: datetime
+    dropped_date: datetime | None = None
+    drop_reason: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -62,6 +72,11 @@ class StudentListResponse(BaseModel):
     """Schema for returning a list of students."""
     students: list[StudentResponse]
     total: int
+
+
+class StudentDropRequest(BaseModel):
+    """Schema for dropping a student (soft-delete)."""
+    reason: str | None = Field(None, max_length=255, examples=["Transferred to another section"])
 
 
 # ─── Attendance Schemas ───────────────────────────────────────────────
@@ -112,6 +127,49 @@ class StudentSummaryResponse(BaseModel):
     late_percentage: float
     consecutive_absences: int
     consecutive_lates: int
+
+
+# ─── Calendar Event Schemas ───────────────────────────────────────────
+
+class CalendarEventCreate(BaseModel):
+    """Schema for creating a calendar event (holiday, suspension, professor excuse)."""
+    date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", examples=["2026-11-01"])
+    event_type: CalendarEventTypeEnum
+    title: str = Field(..., min_length=1, max_length=150, examples=["All Saints' Day"])
+    description: str | None = Field(None, max_length=255)
+
+
+class CalendarEventUpdate(BaseModel):
+    """Schema for updating a calendar event."""
+    date: str | None = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    event_type: CalendarEventTypeEnum | None = None
+    title: str | None = Field(None, min_length=1, max_length=150)
+    description: str | None = None
+
+
+class CalendarEventResponse(BaseModel):
+    """Schema for returning a calendar event."""
+    id: int
+    date: str
+    event_type: CalendarEventTypeEnum
+    title: str
+    description: str | None = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class CalendarEventListResponse(BaseModel):
+    """Schema for returning a list of calendar events."""
+    events: list[CalendarEventResponse]
+    total: int
+
+
+class DateCheckResponse(BaseModel):
+    """Schema for checking if a date is a non-class day."""
+    date: str
+    is_class_day: bool
+    event: CalendarEventResponse | None = None
 
 
 # ─── System Time Schemas ──────────────────────────────────────────────

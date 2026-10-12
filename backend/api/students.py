@@ -13,7 +13,9 @@ KEY OOP CONCEPTS:
 - Encapsulation: Database details hidden behind the ORM interface
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
@@ -22,6 +24,7 @@ from backend.schemas import (
     StudentCreate,
     StudentResponse,
     StudentListResponse,
+    StudentDropRequest,
 )
 
 router = APIRouter(tags=["Students"])
@@ -100,13 +103,22 @@ def seed_default_students_if_empty(db: Session) -> list[StudentModel]:
 
 
 @router.get("/", response_model=StudentListResponse)
-def list_students(db: Session = Depends(get_db)):
+def list_students(
+    include_dropped: bool = Query(
+        default=False,
+        description="If true, include students with 'dropped' status in results",
+    ),
+    db: Session = Depends(get_db),
+):
     """
     Get all registered students.
     
-    Returns a list of Student objects from the database.
+    By default, dropped students are excluded. Pass include_dropped=true
+    to see all students including those who have been soft-deleted.
     """
     students = seed_default_students_if_empty(db)
+    if not include_dropped:
+        students = [s for s in students if s.status != "dropped"]
     return StudentListResponse(
         students=[StudentResponse.model_validate(s) for s in students],
         total=len(students),
@@ -177,6 +189,74 @@ def update_student_status(
         raise HTTPException(status_code=404, detail=f"Student {student_id} not found.")
     
     student.status = status
+    db.commit()
+    db.refresh(student)
+    return StudentResponse.model_validate(student)
+
+
+@router.patch("/{student_id}/drop", response_model=StudentResponse)
+def drop_student(
+    student_id: str,
+    payload: StudentDropRequest = None,
+    db: Session = Depends(get_db),
+):
+    """
+    Mark a student as 'dropped' (soft-delete).
+    
+    PARADIGM NOTE:
+    Instead of deleting the StudentModel OBJECT (which would destroy
+    all associated attendance records), we update the object's status.
+    This preserves historical data for reporting and auditing.
+    
+    The student record remains in the database but is excluded from:
+    - Active attendance marking
+    - Default student listings
+    - Enrolled student counts
+    """
+    student = db.query(StudentModel).filter(StudentModel.id == student_id).first()
+    if student is None:
+        raise HTTPException(status_code=404, detail=f"Student {student_id} not found.")
+    
+    if student.status == "dropped":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Student {student_id} is already dropped.",
+        )
+    
+    student.status = "dropped"
+    student.dropped_date = datetime.now(timezone.utc)
+    student.drop_reason = payload.reason if payload else None
+    db.commit()
+    db.refresh(student)
+    return StudentResponse.model_validate(student)
+
+
+@router.patch("/{student_id}/reenroll", response_model=StudentResponse)
+def reenroll_student(
+    student_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Re-activate a dropped student back to 'enrolled' status.
+    
+    PARADIGM NOTE:
+    Restoring a soft-deleted object by modifying its status attribute.
+    The ORM tracks the change and persists it on commit. The student's
+    historical attendance data is fully preserved throughout.
+    """
+    student = db.query(StudentModel).filter(StudentModel.id == student_id).first()
+    if student is None:
+        raise HTTPException(status_code=404, detail=f"Student {student_id} not found.")
+    
+    if student.status != "dropped":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Student {student_id} is not dropped (current status: {student.status}).",
+        )
+    
+    student.status = "enrolled"
+    student.dropped_date = None
+    student.drop_reason = None
     db.commit()
     db.refresh(student)
     return StudentResponse.model_validate(student)
