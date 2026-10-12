@@ -28,6 +28,7 @@ from backend.api.system import router as system_router
 from backend.api.notifications import router as notifications_router
 from backend.api.settings import router as settings_router
 from backend.api.auth import router as auth_router
+from backend.api.calendar import router as calendar_router
 
 
 # ─── Database Initialization ─────────────────────────────────────────
@@ -80,6 +81,7 @@ app.include_router(system_router, prefix="/api/system")
 app.include_router(notifications_router, prefix="/api/notifications")
 app.include_router(settings_router, prefix="/api/settings")
 app.include_router(auth_router, prefix="/api/auth")
+app.include_router(calendar_router, prefix="/api/calendar")
 
 
 @app.get("/")

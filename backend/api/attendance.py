@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
-from backend.db_models import StudentModel, AttendanceRecordModel
+from backend.db_models import StudentModel, AttendanceRecordModel, CalendarEventModel
 from backend.schemas import (
     AttendanceMarkRequest,
     AttendanceRecordResponse,
@@ -32,12 +32,28 @@ def mark_attendance(
     
     PARADIGM NOTE:
     This endpoint mirrors AttendanceTracker.mark_attendance() from the
-    OOP model. It validates the student exists, creates an AttendanceRecord
+    OOP model. It validates the student exists, checks for calendar events
+    (holidays, suspensions, professor excuses), creates an AttendanceRecord
     OBJECT, and persists it to the database.
     
     In the functional JS approach, this would be a pure function:
     markAttendance(records, studentId, date, status) → [...records, newRecord]
     """
+    # Check if the date is a non-class day (holiday, suspension, professor excuse)
+    calendar_event = (
+        db.query(CalendarEventModel)
+        .filter(CalendarEventModel.date == payload.date)
+        .first()
+    )
+    if calendar_event:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Cannot mark attendance on {payload.date}: "
+                f"{calendar_event.title} ({calendar_event.event_type})"
+            ),
+        )
+    
     # Validate student exists and is active
     student = db.query(StudentModel).filter(
         StudentModel.id == payload.student_id

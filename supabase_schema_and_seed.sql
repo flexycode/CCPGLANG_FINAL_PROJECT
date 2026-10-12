@@ -21,7 +21,9 @@ CREATE TABLE students (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'enrolled',
-    enrolled_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    enrolled_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dropped_date TIMESTAMPTZ,
+    drop_reason VARCHAR(255)
 );
 
 -- Attendance Records table
@@ -199,3 +201,38 @@ INSERT INTO notifications (title, message, category, is_read, relative_time) VAL
 ('Absence Warning: Clark, Ronald', 'Clark, Ronald (2023-003) has reached 3 consecutive unexcused absences.', 'warning', FALSE, '10 minutes ago'),
 ('Late Advisory: Mitchell, Lisa', 'Mitchell, Lisa (2023-005) recorded 3 tardiness entries this week.', 'warning', FALSE, '1 hour ago'),
 ('Class Attendance Complete', 'Attendance for CCPGLANG - COM232 (Programming Languages) is fully recorded for today.', 'system', TRUE, '2 hours ago');
+
+-- -----------------------------------------------------------------------------
+-- 6. Calendar Events Table (Holidays, Suspensions, Professor Excuses)
+-- -----------------------------------------------------------------------------
+DROP TABLE IF EXISTS calendar_events CASCADE;
+
+CREATE TABLE calendar_events (
+    id SERIAL PRIMARY KEY,
+    date VARCHAR(10) NOT NULL,
+    event_type VARCHAR(30) NOT NULL CHECK (event_type IN ('holiday', 'suspension', 'professor_excuse')),
+    title VARCHAR(150) NOT NULL,
+    description VARCHAR(255),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_calendar_events_date ON calendar_events(date);
+
+-- Seed common Philippine holidays for AY 2026-2027
+INSERT INTO calendar_events (date, event_type, title, description) VALUES
+('2026-11-01', 'holiday', 'All Saints'' Day', 'National holiday — no classes'),
+('2026-11-02', 'holiday', 'All Souls'' Day', 'Special non-working day'),
+('2026-11-30', 'holiday', 'Bonifacio Day', 'National holiday — no classes'),
+('2026-12-25', 'holiday', 'Christmas Day', 'National holiday — no classes'),
+('2026-12-30', 'holiday', 'Rizal Day', 'National holiday — no classes'),
+('2027-01-01', 'holiday', 'New Year''s Day', 'National holiday — no classes'),
+('2027-02-25', 'holiday', 'EDSA Revolution Anniversary', 'Special non-working day'),
+('2027-04-09', 'holiday', 'Araw ng Kagitingan', 'National holiday — no classes');
+
+-- -----------------------------------------------------------------------------
+-- 7. Add Soft-Delete Columns to Students Table
+-- -----------------------------------------------------------------------------
+-- Note: These columns are already part of the CREATE TABLE above for fresh installs.
+-- For existing databases, run these ALTER statements:
+-- ALTER TABLE students ADD COLUMN IF NOT EXISTS dropped_date TIMESTAMPTZ;
+-- ALTER TABLE students ADD COLUMN IF NOT EXISTS drop_reason VARCHAR(255);

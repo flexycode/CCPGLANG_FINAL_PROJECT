@@ -28,6 +28,9 @@ class StudentModel(Base):
     
     Maps the Student domain concept to a database table.
     Each instance represents one row in the `students` table.
+    
+    Supports soft-delete: students marked as 'dropped' are preserved
+    for historical attendance data but excluded from active operations.
     """
     __tablename__ = "students"
     
@@ -38,6 +41,8 @@ class StudentModel(Base):
     enrolled_date: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc)
     )
+    dropped_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    drop_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
     
     # Relationship: One student → many attendance records
     attendance_records: Mapped[list["AttendanceRecordModel"]] = relationship(
@@ -45,7 +50,7 @@ class StudentModel(Base):
     )
     
     def __repr__(self) -> str:
-        return f"<Student(id={self.id}, name={self.last_name}, {self.first_name})>"
+        return f"<Student(id={self.id}, name={self.last_name}, {self.first_name}, status={self.status})>"
 
 
 class AttendanceRecordModel(Base):
@@ -74,6 +79,29 @@ class AttendanceRecordModel(Base):
     
     def __repr__(self) -> str:
         return f"<AttendanceRecord(student={self.student_id}, date={self.date}, status={self.status})>"
+
+
+class CalendarEventModel(Base):
+    """
+    ORM model for calendar events (holidays, suspensions, professor excuses).
+    
+    These dates are excluded from the 'total school days' count in analytics,
+    meaning students will NOT be penalized for missing class on these days.
+    Attendance marking is also blocked on these dates.
+    """
+    __tablename__ = "calendar_events"
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    date: Mapped[str] = mapped_column(String(10), nullable=False)           # "YYYY-MM-DD"
+    event_type: Mapped[str] = mapped_column(String(30), nullable=False)     # "holiday", "suspension", "professor_excuse"
+    title: Mapped[str] = mapped_column(String(150), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )
+    
+    def __repr__(self) -> str:
+        return f"<CalendarEvent(id={self.id}, date={self.date}, type={self.event_type}, title={self.title})>"
 
 
 class NotificationModel(Base):

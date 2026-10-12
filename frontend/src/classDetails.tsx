@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, UserPlus, UserMinus, Trash2, FileDown, ChevronDown, Check, Users, CheckCircle2, UserX, Clock, FileText } from 'lucide-react';
+import { Search, UserPlus, UserMinus, Trash2, FileDown, ChevronDown, Check, Users, CheckCircle2, UserX, Clock, FileText, RotateCcw, Ban } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import HeaderDate from './components/HeaderDate';
 import { TimePicker } from '@/components/ui/time-picker';
@@ -22,6 +22,9 @@ interface Student {
     status: 'Present' | 'Absent' | 'Late' | 'Excused' | 'Select status';
     checkIn: string;
     remarks: string;
+    enrollmentStatus?: 'enrolled' | 'dropped' | 'late_enrolled';
+    droppedDate?: string;
+    dropReason?: string;
 }
 
 const initialStudentsByClass: Record<string, Student[]> = {
@@ -248,9 +251,11 @@ export default function ClassDetails({
     const [showRemoveModal, setShowRemoveModal] = useState(false);
     const [removeSearchQuery, setRemoveSearchQuery] = useState('');
     const [studentPendingRemoval, setStudentPendingRemoval] = useState<{ no: string; name: string; studentId: string } | null>(null);
-    const [activeCardModal, setActiveCardModal] = useState<'Enrolled' | 'Present' | 'Absent' | 'Late' | 'Excused' | null>(null);
+    const [activeCardModal, setActiveCardModal] = useState<'Enrolled' | 'Present' | 'Absent' | 'Late' | 'Excused' | 'Dropped' | null>(null);
     const [newStudentName, setNewStudentName] = useState('');
     const [newStudentId, setNewStudentId] = useState('');
+    const [showDropped, setShowDropped] = useState(false);
+    const [dropReasonInput, setDropReasonInput] = useState('');
 
     const saveClassStudents = (updated: Student[]) => {
         try {
@@ -261,22 +266,31 @@ export default function ClassDetails({
     };
 
     // Truly dynamic counts calculation synchronized with the class's enrolled students list
-    const totalEnrolled = students.length;
-    const presentCount = students.filter(s => s.status === 'Present').length;
-    const absentCount = students.filter(s => s.status === 'Absent').length;
-    const lateCount = students.filter(s => s.status === 'Late').length;
-    const excusedCount = students.filter(s => s.status === 'Excused').length;
+    // Only count active (non-dropped) students for attendance stats
+    const activeStudents = students.filter(s => (s.enrollmentStatus || 'enrolled') !== 'dropped');
+    const droppedStudents = students.filter(s => (s.enrollmentStatus || 'enrolled') === 'dropped');
+    const totalEnrolled = activeStudents.length;
+    const droppedCount = droppedStudents.length;
+    const presentCount = activeStudents.filter(s => s.status === 'Present').length;
+    const absentCount = activeStudents.filter(s => s.status === 'Absent').length;
+    const lateCount = activeStudents.filter(s => s.status === 'Late').length;
+    const excusedCount = activeStudents.filter(s => s.status === 'Excused').length;
 
     const filteredStudents = students.filter(
-        s =>
-            s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.studentId.includes(searchQuery)
+        s => {
+            const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                s.studentId.includes(searchQuery);
+            const isDropped = (s.enrollmentStatus || 'enrolled') === 'dropped';
+            if (!showDropped && isDropped) return false;
+            return matchesSearch;
+        }
     );
 
     const getModalStudents = () => {
         if (!activeCardModal) return [];
-        if (activeCardModal === 'Enrolled') return students;
-        return students.filter(s => s.status === activeCardModal);
+        if (activeCardModal === 'Enrolled') return activeStudents;
+        if (activeCardModal === 'Dropped') return droppedStudents;
+        return activeStudents.filter(s => s.status === activeCardModal);
     };
 
     const modalStudentsList = getModalStudents();
@@ -349,19 +363,54 @@ export default function ClassDetails({
         );
     };
 
-    const handleRemoveStudent = (studentNo: string) => {
+    const handleDropStudent = (studentNo: string, reason?: string) => {
         const target = students.find(s => s.no === studentNo);
-        const updated = students
-            .filter(s => s.no !== studentNo)
-            .map((s, idx) => ({ ...s, no: (idx + 1).toString().padStart(2, '0') }));
+        const updated = students.map(s => {
+            if (s.no === studentNo) {
+                return {
+                    ...s,
+                    enrollmentStatus: 'dropped' as const,
+                    droppedDate: new Date().toISOString(),
+                    dropReason: reason || '',
+                    status: 'Select status' as const,
+                };
+            }
+            return s;
+        });
         setStudents(updated);
         saveClassStudents(updated);
         if (target) {
-            showToast(`Student "${target.name}" removed successfully!`, 'info');
+            showToast(`Student "${target.name}" marked as Dropped`, 'info');
             addNotification(
-                'Student Removed',
-                `Student "${target.name}" (${target.studentId}) was removed from ${classNameTitle}.`,
+                'Student Dropped',
+                `Student "${target.name}" (${target.studentId}) was dropped from ${classNameTitle}.`,
                 'warning'
+            );
+        }
+    };
+
+    const handleReenrollStudent = (studentNo: string) => {
+        const target = students.find(s => s.no === studentNo);
+        const updated = students.map(s => {
+            if (s.no === studentNo) {
+                return {
+                    ...s,
+                    enrollmentStatus: 'enrolled' as const,
+                    droppedDate: undefined,
+                    dropReason: undefined,
+                    status: 'Select status' as const,
+                };
+            }
+            return s;
+        });
+        setStudents(updated);
+        saveClassStudents(updated);
+        if (target) {
+            showToast(`Student "${target.name}" re-enrolled successfully!`);
+            addNotification(
+                'Student Re-enrolled',
+                `Student "${target.name}" (${target.studentId}) was re-enrolled in ${classNameTitle}.`,
+                'student'
             );
         }
     };
@@ -390,8 +439,8 @@ export default function ClassDetails({
                     </div>
                 </div>
 
-                {/* Section 1: Soft Pastel Stat Cards Grid (5 Responsive Cards) */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 w-full">
+                {/* Section 1: Soft Pastel Stat Cards Grid (6 Responsive Cards) */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 w-full">
                     {/* Stat Card 1: Enrolled */}
                     <div
                         onClick={() => setActiveCardModal('Enrolled')}
@@ -435,11 +484,21 @@ export default function ClassDetails({
                     {/* Stat Card 5: Excused */}
                     <div
                         onClick={() => setActiveCardModal('Excused')}
-                        className="col-span-2 sm:col-span-1 bg-[#EDE9FE] dark:bg-[#271945] dark:border dark:border-[#8B5CF6]/40 p-4 sm:p-5 rounded-[22px] flex flex-col items-center justify-center text-center gap-1.5 sm:gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none min-h-[115px] sm:min-h-[130px]"
+                        className="bg-[#EDE9FE] dark:bg-[#271945] dark:border dark:border-[#8B5CF6]/40 p-4 sm:p-5 rounded-[22px] flex flex-col items-center justify-center text-center gap-1.5 sm:gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none min-h-[115px] sm:min-h-[130px]"
                     >
                         <FileText className="w-8 h-8 sm:w-9 sm:h-9 text-[#6D28D9] dark:text-[#D8B4FE] stroke-[2]" />
                         <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#6D28D9] dark:text-[#D8B4FE] leading-none">{excusedCount}</span>
                         <span className="text-xs sm:text-sm font-semibold text-[#6D28D9] dark:text-[#D8B4FE] mt-0.5">Excused</span>
+                    </div>
+
+                    {/* Stat Card 6: Dropped */}
+                    <div
+                        onClick={() => setActiveCardModal('Dropped')}
+                        className="bg-[#F3F4F6] dark:bg-[#1E1E2E] dark:border dark:border-[#6B7280]/40 p-4 sm:p-5 rounded-[22px] flex flex-col items-center justify-center text-center gap-1.5 sm:gap-2 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer select-none min-h-[115px] sm:min-h-[130px]"
+                    >
+                        <Ban className="w-8 h-8 sm:w-9 sm:h-9 text-[#6B7280] dark:text-[#9CA3AF] stroke-[2]" />
+                        <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#6B7280] dark:text-[#9CA3AF] leading-none">{droppedCount}</span>
+                        <span className="text-xs sm:text-sm font-semibold text-[#6B7280] dark:text-[#9CA3AF] mt-0.5">Dropped</span>
                     </div>
                 </div>
 
@@ -475,8 +534,18 @@ export default function ClassDetails({
                                 className="w-[120px] py-2.5 bg-white dark:bg-[#151D2A] border border-gray-200/80 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-[#1E293B] text-[#1F2328] dark:text-white text-xs font-bold rounded-full transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                             >
                                 <UserMinus size={16} />
-                                <span>Remove</span>
+                                <span>Drop</span>
                             </button>
+                            {/* Show Dropped Toggle */}
+                            <label className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-[#151D2A] border border-gray-200/80 dark:border-white/10 rounded-full shadow-sm cursor-pointer select-none hover:bg-gray-50 dark:hover:bg-[#1E293B] transition-all">
+                                <input
+                                    type="checkbox"
+                                    checked={showDropped}
+                                    onChange={(e) => setShowDropped(e.target.checked)}
+                                    className="w-3.5 h-3.5 rounded accent-gray-500 cursor-pointer"
+                                />
+                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Show Dropped</span>
+                            </label>
                         </div>
                     </div>
 
@@ -525,55 +594,88 @@ export default function ClassDetails({
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 dark:divide-white/5">
-                                    {filteredStudents.map((student) => (
-                                        <tr key={student.no + student.name} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+                                    {filteredStudents.map((student) => {
+                                        const isDropped = (student.enrollmentStatus || 'enrolled') === 'dropped';
+                                        return (
+                                        <tr key={student.no + student.name} className={`transition-colors ${isDropped ? 'opacity-50 bg-gray-50/50 dark:bg-white/[0.02]' : 'hover:bg-gray-50/50 dark:hover:bg-white/5'}`}>
                                             <td className="py-4 px-2 text-xs text-gray-400 dark:text-gray-500 font-medium">{student.no}</td>
                                             <td className="py-4 px-2">
                                                 <div className="flex flex-col">
-                                                    <span className="text-xs font-bold text-[#1F2328] dark:text-white">{student.name}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`text-xs font-bold ${isDropped ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-[#1F2328] dark:text-white'}`}>{student.name}</span>
+                                                        {isDropped && (
+                                                            <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-[10px] font-bold rounded-full uppercase tracking-wide">Dropped</span>
+                                                        )}
+                                                    </div>
                                                     <span className="text-[11px] text-gray-400 dark:text-gray-500 font-mono mt-0.5">{student.studentId}</span>
+                                                    {isDropped && student.dropReason && (
+                                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 italic mt-0.5">Reason: {student.dropReason}</span>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="py-4 px-2">
-                                                <StatusCombobox
-                                                    value={student.status}
-                                                    onChange={(newStatus) => handleStatusChange(student.no, newStatus)}
-                                                />
-                                            </td>
-                                            <td className="py-4 px-2">
-                                                <div className="flex items-center gap-2">
-                                                    {student.checkIn ? (
-                                                        <span className="text-xs font-semibold text-[#1F2328] dark:text-gray-200">{student.checkIn}</span>
-                                                    ) : null}
-                                                    <TimePicker
-                                                        value={student.checkIn}
-                                                        onChange={(formatted) => handleFormattedTimeChange(student.no, formatted)}
+                                                {isDropped ? (
+                                                    <span className="px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-white/10 text-gray-400 dark:text-gray-500 border border-gray-200/50 dark:border-white/5 cursor-not-allowed select-none inline-flex items-center gap-1.5">
+                                                        <Ban size={12} />
+                                                        Dropped
+                                                    </span>
+                                                ) : (
+                                                    <StatusCombobox
+                                                        value={student.status}
+                                                        onChange={(newStatus) => handleStatusChange(student.no, newStatus)}
                                                     />
-                                                </div>
+                                                )}
                                             </td>
                                             <td className="py-4 px-2">
-                                                <div className="relative flex items-center justify-between gap-1 group">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Add remarks..."
-                                                        value={student.remarks}
-                                                        onChange={(e) => handleRemarksChange(student.no, e.target.value)}
-                                                        className="w-full text-xs font-medium text-gray-700 dark:text-gray-200 bg-transparent border-none placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:ring-0 pr-2"
-                                                    />
-                                                    {student.remarks ? (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleRemarksChange(student.no, '')}
-                                                            title="Delete remarks"
-                                                            className="p-1 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all cursor-pointer shrink-0 flex items-center gap-1"
-                                                        >
-                                                            <Trash2 size={13} />
-                                                        </button>
-                                                    ) : null}
-                                                </div>
+                                                {isDropped ? (
+                                                    <span className="text-xs text-gray-300 dark:text-gray-600">—</span>
+                                                ) : (
+                                                    <div className="flex items-center gap-2">
+                                                        {student.checkIn ? (
+                                                            <span className="text-xs font-semibold text-[#1F2328] dark:text-gray-200">{student.checkIn}</span>
+                                                        ) : null}
+                                                        <TimePicker
+                                                            value={student.checkIn}
+                                                            onChange={(formatted) => handleFormattedTimeChange(student.no, formatted)}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="py-4 px-2">
+                                                {isDropped ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleReenrollStudent(student.no)}
+                                                        className="px-3 py-1.5 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                                                    >
+                                                        <RotateCcw size={13} />
+                                                        <span>Re-enroll</span>
+                                                    </button>
+                                                ) : (
+                                                    <div className="relative flex items-center justify-between gap-1 group">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Add remarks..."
+                                                            value={student.remarks}
+                                                            onChange={(e) => handleRemarksChange(student.no, e.target.value)}
+                                                            className="w-full text-xs font-medium text-gray-700 dark:text-gray-200 bg-transparent border-none placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:ring-0 pr-2"
+                                                        />
+                                                        {student.remarks ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleRemarksChange(student.no, '')}
+                                                                title="Delete remarks"
+                                                                className="p-1 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all cursor-pointer shrink-0 flex items-center gap-1"
+                                                            >
+                                                                <Trash2 size={13} />
+                                                            </button>
+                                                        ) : null}
+                                                    </div>
+                                                )}
                                             </td>
                                         </tr>
-                                    ))}
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -757,14 +859,14 @@ export default function ClassDetails({
                 </div>
             )}
 
-            {/* Remove Student Selection Modal */}
+            {/* Drop Student Selection Modal */}
             {showRemoveModal && (
                 <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-[#151D2A] rounded-3xl p-6 max-w-md w-full shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] border border-gray-100 dark:border-white/10">
                         <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-3">
                             <div className="flex items-center gap-2.5">
-                                <UserMinus size={20} className="text-red-500" />
-                                <h3 className="text-lg font-serif font-bold text-[#1F2328] dark:text-white">Remove Student</h3>
+                                <UserMinus size={20} className="text-amber-500" />
+                                <h3 className="text-lg font-serif font-bold text-[#1F2328] dark:text-white">Drop Student</h3>
                             </div>
                             <button
                                 onClick={() => setShowRemoveModal(false)}
@@ -775,7 +877,7 @@ export default function ClassDetails({
                         </div>
 
                         <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                            Select a student from the list below to remove them from this class subject.
+                            Select an enrolled student to mark them as dropped. They will remain in historical records.
                         </p>
 
                         {/* Search Bar inside Modal */}
@@ -783,7 +885,7 @@ export default function ClassDetails({
                             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Search student to remove..."
+                                placeholder="Search student to drop..."
                                 value={removeSearchQuery}
                                 onChange={(e) => setRemoveSearchQuery(e.target.value)}
                                 className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-[#1E293B] border border-gray-200 dark:border-white/10 rounded-xl text-xs font-medium text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-blue-500"
@@ -792,8 +894,11 @@ export default function ClassDetails({
 
                         {/* Student selection list */}
                         <div className="overflow-y-auto max-h-[40vh] flex flex-col gap-2 pr-1 divide-y divide-gray-100 dark:divide-white/5">
-                            {students.filter(s => s.name.toLowerCase().includes(removeSearchQuery.toLowerCase()) || s.studentId.includes(removeSearchQuery)).length > 0 ? (
+                            {students
+                                .filter(s => (s.enrollmentStatus || 'enrolled') !== 'dropped')
+                                .filter(s => s.name.toLowerCase().includes(removeSearchQuery.toLowerCase()) || s.studentId.includes(removeSearchQuery)).length > 0 ? (
                                 students
+                                    .filter(s => (s.enrollmentStatus || 'enrolled') !== 'dropped')
                                     .filter(s => s.name.toLowerCase().includes(removeSearchQuery.toLowerCase()) || s.studentId.includes(removeSearchQuery))
                                     .map((student) => {
                                         return (
@@ -815,17 +920,17 @@ export default function ClassDetails({
                                                             studentId: student.studentId,
                                                         });
                                                     }}
-                                                    className="px-3 py-1.5 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                                                    className="px-3 py-1.5 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
                                                 >
-                                                    <Trash2 size={13} />
-                                                    <span>Remove</span>
+                                                    <UserMinus size={13} />
+                                                    <span>Drop</span>
                                                 </button>
                                             </div>
                                         );
                                     })
                             ) : (
                                 <div className="py-6 text-center text-xs text-gray-400 font-medium">
-                                    No students found matching "{removeSearchQuery}".
+                                    No active students found matching "{removeSearchQuery}".
                                 </div>
                             )}
                         </div>
@@ -842,39 +947,56 @@ export default function ClassDetails({
                 </div>
             )}
 
-            {/* Confirmation Dialog Modal for Removal */}
+            {/* Confirmation Dialog Modal for Dropping Student */}
             {studentPendingRemoval && (
                 <div className="fixed inset-0 z-[110] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-[#151D2A] rounded-3xl p-6 max-w-sm w-full shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150 border border-gray-100 dark:border-white/10">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
-                                <Trash2 size={20} />
+                            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                                <Ban size={20} />
                             </div>
                             <div>
-                                <h3 className="text-base font-serif font-bold text-[#1F2328] dark:text-white">Confirm Removal</h3>
-                                <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">This action cannot be undone.</p>
+                                <h3 className="text-base font-serif font-bold text-[#1F2328] dark:text-white">Mark as Dropped</h3>
+                                <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Student remains in records but excluded from active attendance.</p>
                             </div>
                         </div>
 
                         <p className="text-xs font-medium text-gray-600 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-white/5 p-3.5 rounded-2xl border border-gray-100 dark:border-white/10">
-                            Are you sure you want to remove <strong className="text-[#1F2328] dark:text-white font-bold">{studentPendingRemoval.name}</strong> ({studentPendingRemoval.studentId}) from {classNameTitle}?
+                            Are you sure you want to mark <strong className="text-[#1F2328] dark:text-white font-bold">{studentPendingRemoval.name}</strong> ({studentPendingRemoval.studentId}) as dropped from {classNameTitle}?
                         </p>
+
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">
+                                Reason for dropping (optional):
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="e.g. Transferred, Medical, Personal, Academic"
+                                value={dropReasonInput}
+                                onChange={(e) => setDropReasonInput(e.target.value)}
+                                className="w-full px-3 py-2 bg-gray-50 dark:bg-[#1E293B] border border-gray-200 dark:border-white/10 rounded-xl text-xs font-medium text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            />
+                        </div>
 
                         <div className="flex items-center justify-end gap-2 mt-1">
                             <button
-                                onClick={() => setStudentPendingRemoval(null)}
+                                onClick={() => {
+                                    setStudentPendingRemoval(null);
+                                    setDropReasonInput('');
+                                }}
                                 className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-all cursor-pointer"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={() => {
-                                    handleRemoveStudent(studentPendingRemoval.no);
+                                    handleDropStudent(studentPendingRemoval.no, dropReasonInput);
                                     setStudentPendingRemoval(null);
+                                    setDropReasonInput('');
                                 }}
-                                className="px-5 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-sm transition-all cursor-pointer"
+                                className="px-5 py-2 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-sm transition-all cursor-pointer"
                             >
-                                Confirm Remove
+                                Confirm Drop
                             </button>
                         </div>
                     </div>
